@@ -1,0 +1,5 @@
+[*.{kt,kts}]
+ktlint_code_style = intellij_idea
+ktlint_standard_comment-wrapping = disabled
+ktlint_standard_package-name = disabled
+
