@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 @Getter
 @EqualsAndHashCode(callSuper = false)
-public class AppConfigValueParseException extends Exception {
+public class AppConfigValueParseException extends RuntimeException {
 
     @NotNull
     private static String errorMessage(@NotNull final String response) {

@@ -1,6 +1,6 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
 
-
+import dev.openfeature.sdk.Value;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -16,11 +16,11 @@ import static java.util.Objects.requireNonNull;
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public final class AppConfigBooleanValue extends AppConfigValue<Boolean> {
+public final class AppConfigObjectValue extends AppConfigValue<Value> {
 
-    AppConfigBooleanValue(
+    AppConfigObjectValue(
         @NotNull Boolean enabled,
-        @NotNull Boolean value,
+        @NotNull Value value,
         @Language("json") @NotNull String jsonFormat
     ) {
         super(
