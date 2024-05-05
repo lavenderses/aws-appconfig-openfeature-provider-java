@@ -8,7 +8,7 @@ object Time {
 
     const val FIXED_TIME = "2024-04-01T10:00:00.00Z"
 
-    val fixedInstant = Instant.parse(FIXED_TIME)
+    val fixedInstant: Instant = Instant.parse(FIXED_TIME)
 
-    val fixedClock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
+    val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.of("UTC"))
 }
