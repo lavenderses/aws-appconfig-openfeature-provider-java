@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.util.Objects.requireNonNull;
 
-
 /**
  * Actual flag value holder class. This class means that flag fetching from AWS AppConfig succeeded
  * including type checks.

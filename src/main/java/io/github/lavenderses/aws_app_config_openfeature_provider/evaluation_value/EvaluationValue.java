@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * Interface result class between OpenFeature Provider ({@link PrimitiveEvaluationValue} and AWS AppConfig value
  * ({@link AppConfigValue}). <br>
  * A service implementation which fetches flag value from AWS AppConfig returns this record so that separating
- * OpenFeature spec and AWS AppConfig client interface.<br/>
+ * OpenFeature requirements and AWS AppConfig client interface.<br/>
  * <pre>
  * {@code
  * [Client] * OpenFeature SDK
@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface EvaluationValue<T> {
 
+    // TODO change to EvaluationResult
     @Requirements(
         number = "2.2.5",
         kind = Normative.SHOULD,
