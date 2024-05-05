@@ -16,7 +16,7 @@ import static java.util.Objects.requireNonNull;
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class AppConfigObjectValue extends AppConfigValue<Value> {
+public final class AppConfigObjectValue extends AppConfigValue<Value> {
 
     AppConfigObjectValue(
         @NotNull Boolean enabled,
