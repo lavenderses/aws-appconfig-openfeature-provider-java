@@ -1,26 +1,32 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
 
 
-import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.PrimitiveEvaluationValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.SuccessEvaluationValue;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-@ToString
+import static java.util.Objects.requireNonNull;
+
+/**
+ * Boolean type in AWS AppConfig's Attribute.<br/>
+ * This feature flag will be mapped as boolean in OpenFeature requirements.
+ */
+@Getter
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public final class AppConfigBooleanValue extends AppConfigValue<Boolean> {
 
-    public AppConfigBooleanValue(final boolean enable) {
+    AppConfigBooleanValue(
+        @NotNull Boolean enabled,
+        @NotNull Boolean value,
+        @Language("json") @NotNull String jsonFormat
+    ) {
         super(
-            /* enable = */ enable
-        );
-    }
-
-    @NotNull
-    @Override
-    public SuccessEvaluationValue<Boolean> successEvaluationValue() {
-        return new PrimitiveEvaluationValue<>(
-            /* rawValue = */ isEnable(),
-            /* reason = */ SUCCESS_REASON
+            /* enabled = */ enabled,
+            /* value = */ value,
+            /* jsonFormat = */ requireNonNull(jsonFormat, "jsonFormat")
         );
     }
 }

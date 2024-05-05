@@ -49,6 +49,7 @@ dependencies {
     testImplementation("dev.openfeature:sdk:1.7.6")
 
     testFixturesImplementation("dev.openfeature:sdk:1.7.6")
+    testFixturesImplementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
 }
 
 tasks.withType<Jar> {

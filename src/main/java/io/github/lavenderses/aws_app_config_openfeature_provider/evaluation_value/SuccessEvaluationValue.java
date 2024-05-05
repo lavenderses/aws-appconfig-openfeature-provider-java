@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import static java.util.Objects.requireNonNull;
 
-
 /**
  * Actual flag value holder class. This class means that flag fetching from AWS AppConfig succeeded
  * including type checks.
@@ -24,10 +23,8 @@ public abstract class SuccessEvaluationValue<T> implements EvaluationValue<T> {
     @Requirements(
         number = "2.2.3",
         kind = Normative.MUST,
-        by = """
-            Containing this wrapped value as value in resolution details.
-            (SuccessEvaluationValue represents 'succeeded normal execution'.)
-        """
+        by = "Containing this wrapped value as value in resolution details." +
+            "(SuccessEvaluationValue represents 'succeeded normal execution'.)"
     )
     private final T wrappedValue;
 
