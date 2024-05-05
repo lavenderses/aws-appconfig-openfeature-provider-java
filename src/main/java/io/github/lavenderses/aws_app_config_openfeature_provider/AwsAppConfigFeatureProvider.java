@@ -11,6 +11,7 @@ import dev.openfeature.sdk.ProviderState;
 import dev.openfeature.sdk.Value;
 import java.util.List;
 
+import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Normative;
 import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Requirements;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +89,7 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final var evaluationValue = awsAppConfigClientService.getBoolean(key);
+        final EvaluationValue<Boolean> evaluationValue = awsAppConfigClientService.getBoolean(key);
 
         return evaluationValue.providerEvaluation();
     }
@@ -104,7 +105,7 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final var evaluationValue = awsAppConfigClientService.getString(key);
+        final EvaluationValue<String> evaluationValue = awsAppConfigClientService.getString(key);
 
         return evaluationValue.providerEvaluation();
     }
@@ -120,7 +121,7 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final var evaluationValue = awsAppConfigClientService.getInteger(key);
+        final EvaluationValue<Integer> evaluationValue = awsAppConfigClientService.getInteger(key);
 
         return evaluationValue.providerEvaluation();
     }
@@ -136,7 +137,7 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final var evaluationValue = awsAppConfigClientService.getDouble(key);
+        final EvaluationValue<Double> evaluationValue = awsAppConfigClientService.getDouble(key);
 
         return evaluationValue.providerEvaluation();
     }
@@ -152,7 +153,7 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final var evaluationValue = awsAppConfigClientService.getValue(key);
+        final EvaluationValue<Value> evaluationValue = awsAppConfigClientService.getValue(key);
 
         return evaluationValue.providerEvaluation();
     }

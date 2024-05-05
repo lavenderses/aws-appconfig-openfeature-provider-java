@@ -20,11 +20,9 @@ import static java.util.Objects.nonNull;
 @Requirements(
     number = "2.2.7",
     kind = Normative.MUST,
-    by = """
-       Each field in this class.
-       This class annotate errorCode and errorMessage as NOT-null. And providerEvaluation method uses them. Thus return
-       value as ProviderEvaluation will contains errorCode and (optional) errorMessage.
-    """
+    by = "Each field in this class." +
+       "This class annotate errorCode and errorMessage as NOT-null. And providerEvaluation method uses them. Thus" +
+       "return value as ProviderEvaluation will contains errorCode and (optional) errorMessage."
 )
 @EqualsAndHashCode
 @ToString

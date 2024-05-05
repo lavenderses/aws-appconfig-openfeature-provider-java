@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
  * [Provider impl]
  *    | - EvaluationValue<T> (this class)
  * [AWS AppConfig client]
- *    | - via AWS SDK
+ *    | - AppConfigValue
  * [AWS AppConfig instance]
  * }
  * </pre>
@@ -34,11 +34,9 @@ public interface EvaluationValue<T> {
     @Requirements(
         number = "2.2.5",
         kind = Normative.SHOULD,
-        by = """
-            Implementing this interface method.
-            This method will be called on each `providerEvaluation` method and the returned value (`Reason`) will be set
-            to ProviderEvaluation field.
-        """
+        by = "Implementing this interface method." +
+            "This method will be called on each `providerEvaluation` method and the returned value (`Reason`) will be" +
+            "set to ProviderEvaluation field."
     )
     @NotNull
     Reason reason();

@@ -24,10 +24,8 @@ public abstract class SuccessEvaluationValue<T> implements EvaluationValue<T> {
     @Requirements(
         number = "2.2.3",
         kind = Normative.MUST,
-        by = """
-            Containing this wrapped value as value in resolution details.
-            (SuccessEvaluationValue represents 'succeeded normal execution'.)
-        """
+        by = "Containing this wrapped value as value in resolution details." +
+            "(SuccessEvaluationValue represents 'succeeded normal execution'.)"
     )
     private final T wrappedValue;
 
