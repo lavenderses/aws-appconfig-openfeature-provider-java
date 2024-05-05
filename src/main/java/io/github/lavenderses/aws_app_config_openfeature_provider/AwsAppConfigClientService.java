@@ -1,25 +1,27 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.openfeature.sdk.ErrorCode;
 import dev.openfeature.sdk.Reason;
 import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValueParseException;
+import io.github.lavenderses.aws_app_config_openfeature_provider.converter.AppConfigValueConverter;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.PrimitiveEvaluationValue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.AwsAppConfigClientBuilder;
-import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AwsAppConfigParser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest;
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse;
@@ -32,16 +34,19 @@ final class AwsAppConfigClientService {
     private static final Logger log = LoggerFactory.getLogger(AwsAppConfigClientService.class);
 
     @NotNull
+    private final AtomicReference<AwsAppConfigState> appConfigState = new AtomicReference<>(AwsAppConfigState.NONE);
+
+    @NotNull
     private final AppConfigDataClient client;
 
     @NotNull
     private final AwsAppConfigClientOptions options;
 
     @NotNull
-    private final ObjectMapper objectMapper;
+    private final AwsAppConfigParser awsAppConfigParser;
 
     @NotNull
-    private final AtomicReference<AwsAppConfigState> appConfigState = new AtomicReference<>(AwsAppConfigState.NONE);
+    private final AppConfigValueConverter appConfigValueConverter;
 
     /**
      * This is just for mockito JUnit extension.
@@ -52,11 +57,13 @@ final class AwsAppConfigClientService {
     AwsAppConfigClientService(
         @NotNull final AppConfigDataClient client,
         @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final ObjectMapper objectMapper
+        @NotNull final AwsAppConfigParser awsAppConfigParser,
+        @NotNull final AppConfigValueConverter appConfigValueConverter
     ) {
-        this.client = client;
-        this.options = options;
-        this.objectMapper = objectMapper;
+        this.client = requireNonNull(client, "AppConfigDataClient");
+        this.options = requireNonNull(options, "AwsAppConfigClientOptions");
+        this.awsAppConfigParser = requireNonNull(awsAppConfigParser, "AwsAppConfigParse");
+        this.appConfigValueConverter = requireNonNull(appConfigValueConverter, "appConfigValueConverter");
     }
 
     /**
@@ -72,7 +79,8 @@ final class AwsAppConfigClientService {
 
         this.options = requireNonNull(options, "awsAppConfigClientOptions");
         client = AwsAppConfigClientBuilder.build(options);
-        objectMapper = ObjectMapperBuilder.build();
+        awsAppConfigParser = new AwsAppConfigParser();
+        appConfigValueConverter = new AppConfigValueConverter();
     }
 
     @NotNull
@@ -81,16 +89,15 @@ final class AwsAppConfigClientService {
     }
 
     /**
-     * Get Boolean type flag from AppConfig by {@param key}. Returns
-     *
-     * <ul>
-     *   <li>{@link ErrorCode#FLAG_NOT_FOUND} when flag value related to {@param key} does not exist.
-     *   <li>{@link ErrorCode#PARSE_ERROR} when flag value related to {@param key} is not bool value.
-     * </ul>
+     * Get Boolean type feature flag from AppConfig by {@param key}.
      */
     @NotNull
-    EvaluationValue<Boolean> getBoolean(@NotNull final String key) {
-        final var request = GetLatestConfigurationRequest.builder()
+    EvaluationValue<Boolean> getBoolean(
+        @NotNull final String key,
+        @NotNull final Boolean defaultValue
+    ) {
+        // Get configuration from AWS AppConfig via SDK
+        final GetLatestConfigurationRequest request = GetLatestConfigurationRequest.builder()
             .configurationToken(options.getApplicationName())
             .build();
 
@@ -107,10 +114,34 @@ final class AwsAppConfigClientService {
             );
         }
 
-        return evaluateInternal(
+        final String responseBody = extractResponseBody(
             /* key = */ key,
-            /* response = */ response,
-            /* clazz = */ AppConfigBooleanValue.class
+            /* response = */ response
+        );
+        if (isNull(responseBody)) {
+            return parseErrorEvaluationValue(
+                /* errorMessage = */ null
+            );
+        }
+
+        // Parse SDK response as boolean feature flag
+        final AppConfigBooleanValue flagValue;
+        try {
+            flagValue = awsAppConfigParser.parseAsBooleanValue(
+                /* key = */ key,
+                /* value = */ responseBody
+            );
+        } catch (final AppConfigValueParseException e) {
+            log.error("Failed to parse object from AWS AppConfig response. Fall back to default flag value", e);
+            return e.asErrorEvaluationResult();
+        }
+        log.info("Flag value [{}: {}] fetched.", key, flagValue.getValue());
+
+        return appConfigValueConverter.toEvaluationValue(
+            /* defaultValue = */ defaultValue,
+            /* appConfigValue = */ flagValue,
+            // true because this is boolean flag
+            /* asPrimitive = */ true
         );
     }
 
@@ -134,25 +165,31 @@ final class AwsAppConfigClientService {
       return null;
     }
 
-    @NotNull
+    /**
+     * @param key feature flag key in OpenFeature world
+     * @param response SDK response object
+     * @return JSON string when repose is valid, otherwise null
+     */
+    @Nullable
     @VisibleForTesting
-    <FLAG, FLAG_VALUE_TYPE extends AppConfigValue<FLAG>> EvaluationValue<FLAG> evaluateInternal(
+    String extractResponseBody(
         @NotNull final String key,
-        @NotNull final GetLatestConfigurationResponse response,
-        @NotNull final Class<FLAG_VALUE_TYPE> clazz
+        @NotNull final GetLatestConfigurationResponse response
     ) {
-      if (response.configuration().asByteArray().length == 0) {
-          log.info("Flag value from AppConfig with key {} does not found.", key);
+        final SdkBytes configuration = response.configuration();
+        if (isNull(configuration) || configuration.asByteArray().length == 0) {
+            log.info("Flag value from AppConfig with key {} does not found.", key);
 
-          return new ErrorEvaluationValue<>(
-              /* errorCode = */ ErrorCode.PARSE_ERROR,
-              /* errorMessage = */ null,
-              /* reason = */ Reason.ERROR);
-      }
+            return null;
+        }
 
-      final AppConfigValue<FLAG> flagValue = objectMapper.convertValue(response.configuration().asUtf8String(), clazz);
-      log.info("Flag value [{}: {}] fetched.", key, flagValue);
+        return configuration.asUtf8String();
+    }
 
-      return flagValue.successEvaluationValue();
+    private <T> EvaluationValue<T> parseErrorEvaluationValue(@Nullable final String errorMessage) {
+        return new ErrorEvaluationValue<>(
+            /* errorCode = */ ErrorCode.PARSE_ERROR,
+            /* errorMessage = */ errorMessage,
+            /* reason = */ Reason.ERROR);
     }
 }

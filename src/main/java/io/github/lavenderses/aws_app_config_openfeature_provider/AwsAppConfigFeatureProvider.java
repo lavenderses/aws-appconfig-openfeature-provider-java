@@ -81,15 +81,18 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
     @NotNull
     @Override
     public ProviderEvaluation<Boolean> getBooleanEvaluation(
-        @Nullable final String key,
-        @Nullable final Boolean defaultValue,
-        @Nullable final EvaluationContext evaluationContext
+        @NotNull final String key,
+        @NotNull final Boolean defaultValue,
+        @NotNull final EvaluationContext evaluationContext
     ) {
         requireNonNull(key, "key");
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final EvaluationValue<Boolean> evaluationValue = awsAppConfigClientService.getBoolean(key);
+        final EvaluationValue<Boolean> evaluationValue = awsAppConfigClientService.getBoolean(
+            /* key = */ key,
+            /* defaultValue = */ defaultValue
+        );
 
         return evaluationValue.providerEvaluation();
     }
