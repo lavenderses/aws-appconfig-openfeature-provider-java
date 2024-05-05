@@ -45,9 +45,10 @@ class AwsAppConfigParserTest {
             println(expected)
             // do & verify
             assertThat(
-                awsAppConfigParser.parseAsBooleanValue(
+                awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
+                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
                 ).also { println(it) },
             ).isEqualTo(expected)
         }
@@ -72,9 +73,10 @@ class AwsAppConfigParserTest {
 
             // do & verify
             assertThat(
-                awsAppConfigParser.parseAsBooleanValue(
+                awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
+                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
                 ),
             ).isEqualTo(expected)
         }
@@ -93,9 +95,10 @@ class AwsAppConfigParserTest {
 
             // do
             val e = assertThrows<AppConfigValueParseException> {
-                awsAppConfigParser.parseAsBooleanValue(
+                awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
+                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
                 )
             }
 
@@ -118,9 +121,10 @@ class AwsAppConfigParserTest {
 
             // do
             val e = assertThrows<AppConfigValueParseException> {
-                awsAppConfigParser.parseAsBooleanValue(
+                awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
+                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
                 )
             }
 

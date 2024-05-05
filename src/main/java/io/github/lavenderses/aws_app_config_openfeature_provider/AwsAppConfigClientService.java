@@ -6,13 +6,14 @@ import static java.util.Objects.requireNonNull;
 import dev.openfeature.sdk.ErrorCode;
 import dev.openfeature.sdk.Reason;
 import dev.openfeature.sdk.Value;
-import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValueParseException;
 import io.github.lavenderses.aws_app_config_openfeature_provider.converter.AppConfigValueConverter;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.AwsAppConfigClientBuilder;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AwsAppConfigParser;
@@ -96,6 +97,62 @@ final class AwsAppConfigClientService {
         @NotNull final String key,
         @NotNull final Boolean defaultValue
     ) {
+        try {
+            return getInternal(
+                /* key = */ key,
+                /* defaultValue = */ defaultValue,
+                /* parseFromResponseBody = */ (responseBody) -> awsAppConfigParser.parse(
+                    /* key = */ key,
+                    /* value = */ responseBody,
+                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean
+                )
+            );
+        } catch (final AppConfigValueParseException e) {
+            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            return e.asErrorEvaluationResult();
+        }
+    }
+
+    @NotNull
+    EvaluationValue<String> getString(@NotNull final String key) {
+      return null;
+    }
+
+    @NotNull
+    EvaluationValue<Integer> getInteger(@NotNull final String key) {
+      return null;
+    }
+
+    @NotNull
+    EvaluationValue<Double> getDouble(@NotNull final String key) {
+      return null;
+    }
+
+    @NotNull
+    EvaluationValue<Value> getValue(
+        @NotNull final String key,
+        @NotNull final Value defaultValue
+    ) {
+        return null;
+    }
+
+    /**
+     * Get generic-typed feature flag value from AWS AppConfig, and return it as {@link EvaluationValue}
+     * <b>NOTE that this will throw when getting feature flag value failed.</b>
+     *
+     * @param key feature flag key. this is specified by Application Author.
+     * @param defaultValue default feature flag value to fall back. this is specified by Application Author.
+     * @param parseFromResponseBody build {@link V} (= {@link T}-typed {@link EvaluationValue} from JSON response object
+     * @return {@link T}-typed {@link EvaluationValue}
+     * @param <T> feature flag type (like boolean / number etc.) in OpenFeature spec
+     * @throws AppConfigValueParseException if parsing JSON response failed, or the JSON response schema is invalid
+     */
+    @NotNull
+    private <T, V extends AppConfigValue<T>> EvaluationValue<T> getInternal(
+        @NotNull final String key,
+        @NotNull final T defaultValue,
+        @NotNull final Function<String, V> parseFromResponseBody
+    ) {
         // Get configuration from AWS AppConfig via SDK
         final GetLatestConfigurationRequest request = GetLatestConfigurationRequest.builder()
             .configurationToken(options.getApplicationName())
@@ -124,17 +181,10 @@ final class AwsAppConfigClientService {
             );
         }
 
-        // Parse SDK response as boolean feature flag
-        final AppConfigBooleanValue flagValue;
-        try {
-            flagValue = awsAppConfigParser.parseAsBooleanValue(
-                /* key = */ key,
-                /* value = */ responseBody
-            );
-        } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parse object from AWS AppConfig response. Fall back to default flag value", e);
-            return e.asErrorEvaluationResult();
-        }
+        // Parse SDK response as boolean feature flag. Exception handling is on top.
+        final V flagValue = parseFromResponseBody.apply(
+            /* t = */ responseBody
+        );
         log.info("Flag value [{}: {}] fetched.", key, flagValue.getValue());
 
         return appConfigValueConverter.toEvaluationValue(
@@ -145,34 +195,13 @@ final class AwsAppConfigClientService {
         );
     }
 
-    @NotNull
-    EvaluationValue<String> getString(@NotNull final String key) {
-      return null;
-    }
-
-    @NotNull
-    EvaluationValue<Integer> getInteger(@NotNull final String key) {
-      return null;
-    }
-
-    @NotNull
-    EvaluationValue<Double> getDouble(@NotNull final String key) {
-      return null;
-    }
-
-    @NotNull
-    EvaluationValue<Value> getValue(@NotNull final String key) {
-      return null;
-    }
-
     /**
      * @param key feature flag key in OpenFeature world
      * @param response SDK response object
      * @return JSON string when repose is valid, otherwise null
      */
     @Nullable
-    @VisibleForTesting
-    String extractResponseBody(
+    private String extractResponseBody(
         @NotNull final String key,
         @NotNull final GetLatestConfigurationResponse response
     ) {

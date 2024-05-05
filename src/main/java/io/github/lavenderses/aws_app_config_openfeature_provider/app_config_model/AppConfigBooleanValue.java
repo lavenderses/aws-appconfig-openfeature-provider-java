@@ -24,8 +24,8 @@ public final class AppConfigBooleanValue extends AppConfigValue<Boolean> {
         @Language("json") @NotNull String jsonFormat
     ) {
         super(
-            /* enabled = */ enabled,
-            /* value = */ value,
+            /* enabled = */ requireNonNull(enabled, "enabled"),
+            /* value = */ requireNonNull(value, "value"),
             /* jsonFormat = */ requireNonNull(jsonFormat, "jsonFormat")
         );
     }

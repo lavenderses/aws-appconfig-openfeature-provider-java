@@ -9,6 +9,8 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMap
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.util.function.BiFunction;
+
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -38,19 +40,23 @@ public final class AwsAppConfigParser {
     }
 
     /**
-     * Convert JSON response from AWS AppConfig to boolean-typed {@link AppConfigValue}.
+     * Convert JSON response from AWS AppConfig to {@link T}-typed {@link AppConfigValue} (= {@link V}}.
      *
      * @param key feature flag key value in {@link AppConfigValueKey} ({@code "feature flag key name in OpenFeature"})
      * @param value JSON response from AWS AppConfig
-     * @return boolean feature flag implementation of {@link AppConfigValue}. Once returned value successfully, it is
-     * guaranteed that JSON response satisfies ALL spec of this Provider's spec, and success to evaluation feature flag.
+     * @param buildAppConfigValue build {@link V} from (request JSON body, key object in response body)
+     * @return {@link T}-typed feature flag implementation of {@link AppConfigValue}. Once returned value successfully,
+     * it is guaranteed that JSON response satisfies ALL spec of this Provider's spec, and success to evaluation feature
+     * flag.
+     * @param <T> feature flag type (like boolean / number etc.) in OpenFeature spec
      * @throws AppConfigValueParseException if parsing JSON response failed, or the JSON response schema is invalid
      */
     @NotNull
-    public AppConfigBooleanValue parseAsBooleanValue(
+    public <T, V extends AppConfigValue<T>> V parse(
         @NotNull final String key,
-        @NotNull final String value
-    ) throws AppConfigValueParseException {
+        @NotNull final String value,
+        @NotNull final BiFunction<JsonNode, JsonNode, V> buildAppConfigValue
+    ) {
         requireNonNull(key, "key");
         requireNonNull(value, "value");
 
@@ -74,21 +80,23 @@ public final class AwsAppConfigParser {
             );
         }
 
-        return new AppConfigBooleanValue(
-            /* enabled = */ enabled(keyNode),
-            /* value = */ attributeAsBoolean(keyNode),
-            /* responseNode = */ responseNode.toString()
+        return buildAppConfigValue.apply(
+            /* t = */ responseNode,
+            /* v = */ keyNode
         );
     }
 
     /**
-     * Extract "Attribute" in AWS AppConfig from JSON response.
+     * Extract "Attribute" as Boolean in AWS AppConfig from JSON response.
      *
      * @param keyNode a response JSON string from AWS AppConfig
-     * @return boolean feature flag if the response schema is valid
+     * @return {@link AppConfigBooleanValue} if the response schema is valid
      * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
      */
-    private boolean attributeAsBoolean(@NotNull final JsonNode keyNode) throws AppConfigValueParseException {
+    public AppConfigBooleanValue attributeAsBoolean(
+        @NotNull final JsonNode responseNode,
+        @NotNull final JsonNode keyNode
+    ) {
         final JsonNode flagValueNode = keyNode.get(AppConfigValueKey.FLAG_VALUE.getKey());
         if (isNull(flagValueNode) || flagValueNode.isNull()) {
             throw new AppConfigValueParseException(
@@ -99,7 +107,11 @@ public final class AwsAppConfigParser {
         }
 
         if (flagValueNode.getNodeType() == JsonNodeType.BOOLEAN) {
-            return flagValueNode.asBoolean();
+            return new AppConfigBooleanValue(
+                /* enabled = */ enabled(keyNode),
+                /* value = */ flagValueNode.asBoolean(),
+                /* responseNode = */ responseNode.toString()
+            );
         } else {
             throw new AppConfigValueParseException(
                 /* response = */ keyNode.toString(),
