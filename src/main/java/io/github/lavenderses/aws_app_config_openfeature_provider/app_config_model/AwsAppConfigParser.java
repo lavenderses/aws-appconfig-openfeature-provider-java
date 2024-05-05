@@ -4,11 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import dev.openfeature.sdk.ImmutableStructure;
+import dev.openfeature.sdk.Structure;
+import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static java.util.Objects.isNull;
@@ -54,7 +63,7 @@ public final class AwsAppConfigParser {
     @NotNull
     public <T, V extends AppConfigValue<T>> V parse(
         @NotNull final String key,
-        @NotNull final String value,
+        @Language("json") @NotNull final String value,
         @NotNull final BiFunction<JsonNode, JsonNode, V> buildAppConfigValue
     ) {
         requireNonNull(key, "key");
@@ -86,6 +95,7 @@ public final class AwsAppConfigParser {
         );
     }
 
+    // TODO(move to external class)
     /**
      * Extract "Attribute" as Boolean in AWS AppConfig from JSON response.
      *
@@ -119,6 +129,99 @@ public final class AwsAppConfigParser {
                 /* evaluationResult = */ EvaluationResult.ATTRIBUTE_TYPE_MISMATCH
             );
         }
+    }
+
+    // TODO(move to external class)
+    /**
+     * Extract "Attribute" as Object in AWS AppConfig from JSON response.
+     *
+     * @param keyNode a response JSON string from AWS AppConfig
+     * @return {@link AppConfigBooleanValue} if the response schema is valid
+     * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
+     */
+    public AppConfigObjectValue attributeAsObject(
+        @NotNull final JsonNode responseNode,
+        @NotNull final JsonNode keyNode
+    ) {
+        final JsonNode flagValueNode = keyNode.get(AppConfigValueKey.FLAG_VALUE.getKey());
+        if (isNull(flagValueNode) || flagValueNode.isNull()) {
+            throw new AppConfigValueParseException(
+                /* response = */ keyNode.toString(),
+                /* errorMessage = */ "`flag_value` should exist",
+                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
+            );
+        }
+
+        // add JSON node's value recursively
+        final HashMap<String, Value> hashMap = new HashMap<>();
+        final Value value = convertJsonNodeAsValueRecursively(
+            /* valueNode = */ flagValueNode,
+            /* hashMap = */ hashMap,
+            /* add = */ hashMap::put
+        );
+
+        return new AppConfigObjectValue(
+            /* enabled = */ enabled(keyNode),
+            /* value = */ value,
+            /* responseNode = */ responseNode.toString()
+        );
+    }
+
+    /**
+     * DFS {@param valueNode} recursively, and put its result as {@link Value} related to field key.
+     *
+     * @param valueNode {@link JsonNode} to DFS
+     * @param hashMap temporary hash map to put the result
+     * @param add lambda to put to {@param hashMap}
+     * @return {@link Value} equals to {@param valueNode}
+     */
+    @NotNull
+    @VisibleForTesting
+    Value convertJsonNodeAsValueRecursively(
+        @NotNull final JsonNode valueNode,
+        @NotNull final Map<String, Value> hashMap,
+        @NotNull final BiConsumer<String, Value> add
+    ) {
+        System.out.println("FFFF: %s".formatted(valueNode));
+        if (valueNode.isTextual()) {
+            final String text = valueNode.asText();
+
+            // If feature flag is datetime, it will be as string type. So, try to parse it as Instant first.
+            // When it is not the valid Instant schema, fallback it as string type
+            try {
+                final Instant instant = Instant.parse(text);
+                return new Value(instant);
+            } catch (final DateTimeParseException e) {
+                return new Value(text);
+            }
+        } else if (valueNode.isBoolean()) {
+            return new Value(valueNode.asBoolean());
+        } else if (valueNode.isNumber()) {
+            return new Value(valueNode.numberValue().intValue());
+        }
+
+        // Search each child node recursively
+        valueNode.fields().forEachRemaining(entry -> {
+            final String key = entry.getKey();
+            final JsonNode childNode = entry.getValue();
+
+            if (isNull(childNode)) {
+                return;
+            }
+            final Map<String, Value> childHashMap = new HashMap<>();
+
+            final Value childValue = convertJsonNodeAsValueRecursively(
+                /* valueNode = */ childNode,
+                /* hashMap = */ childHashMap,
+                /* add = */ childHashMap::put
+            );
+
+            hashMap.put(key, childValue);
+        });
+
+        final Structure structure = new ImmutableStructure(hashMap);
+        System.out.println(structure);
+        return new Value(structure);
     }
 
     /**
