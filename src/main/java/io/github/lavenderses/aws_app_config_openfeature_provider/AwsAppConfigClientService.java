@@ -12,11 +12,10 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AwsAppCo
 import io.github.lavenderses.aws_app_config_openfeature_provider.converter.AppConfigValueConverter;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.BooleanAttributeParser;
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.AwsAppConfigClientBuilder;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -26,6 +25,9 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest;
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse;
+
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * Service layer class for AWS AppConfig.
@@ -49,6 +51,12 @@ final class AwsAppConfigClientService {
     @NotNull
     private final AppConfigValueConverter appConfigValueConverter;
 
+    @NotNull
+    private final BooleanAttributeParser booleanAttributeParser;
+
+    @NotNull
+    private final ObjectAttributeParser objectAttributeParser;
+
     /**
      * This is just for mockito JUnit extension.
      * Locate this constructor on top on constructors so that mockito can mock all fields in
@@ -59,12 +67,16 @@ final class AwsAppConfigClientService {
         @NotNull final AppConfigDataClient client,
         @NotNull final AwsAppConfigClientOptions options,
         @NotNull final AwsAppConfigParser awsAppConfigParser,
-        @NotNull final AppConfigValueConverter appConfigValueConverter
+        @NotNull final AppConfigValueConverter appConfigValueConverter,
+        @NotNull final BooleanAttributeParser booleanAttributeParser,
+        @NotNull final ObjectAttributeParser objectAttributeParser
     ) {
         this.client = requireNonNull(client, "AppConfigDataClient");
         this.options = requireNonNull(options, "AwsAppConfigClientOptions");
         this.awsAppConfigParser = requireNonNull(awsAppConfigParser, "AwsAppConfigParse");
         this.appConfigValueConverter = requireNonNull(appConfigValueConverter, "appConfigValueConverter");
+        this.booleanAttributeParser = requireNonNull(booleanAttributeParser, "booleanAttributeParser");
+        this.objectAttributeParser = requireNonNull(objectAttributeParser, "objectAttributeParser");
     }
 
     /**
@@ -82,6 +94,8 @@ final class AwsAppConfigClientService {
         client = AwsAppConfigClientBuilder.build(options);
         awsAppConfigParser = new AwsAppConfigParser();
         appConfigValueConverter = new AppConfigValueConverter();
+        booleanAttributeParser = new BooleanAttributeParser();
+        objectAttributeParser = new ObjectAttributeParser();
     }
 
     @NotNull
@@ -102,10 +116,10 @@ final class AwsAppConfigClientService {
                 /* key = */ key,
                 /* defaultValue = */ defaultValue,
                 /* asPrimitive = */ true,
-                /* parseFromResponseBody = */ (responseBody) -> awsAppConfigParser.parse(
+                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
                     /* key = */ key,
                     /* value = */ responseBody,
-                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean
+                    /* buildAppConfigValue = */ booleanAttributeParser
                 )
             );
         } catch (final AppConfigValueParseException e) {
@@ -139,10 +153,10 @@ final class AwsAppConfigClientService {
                 /* key = */ key,
                 /* defaultValue = */ defaultValue,
                 /* asPrimitive = */ false,
-                /* parseFromResponseBody = */ (responseBody) -> awsAppConfigParser.parse(
+                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
                     /* key = */ key,
                     /* value = */ responseBody,
-                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsObject
+                    /* buildAppConfigValue = */ objectAttributeParser
                 )
             );
         } catch (final AppConfigValueParseException e) {
