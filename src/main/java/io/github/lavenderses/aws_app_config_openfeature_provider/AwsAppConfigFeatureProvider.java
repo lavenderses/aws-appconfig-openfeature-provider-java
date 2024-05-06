@@ -127,7 +127,10 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         requireNonNull(defaultValue, "defaultValue");
 
         // Get boolean value from AppConfig by key
-        final EvaluationValue<Integer> evaluationValue = awsAppConfigClientService.getInteger(key);
+        final EvaluationValue<Integer> evaluationValue = awsAppConfigClientService.getInteger(
+            /* key = */ key,
+            /* defaultValue = */ defaultValue
+        );
 
         return evaluationValue.providerEvaluation();
     }
