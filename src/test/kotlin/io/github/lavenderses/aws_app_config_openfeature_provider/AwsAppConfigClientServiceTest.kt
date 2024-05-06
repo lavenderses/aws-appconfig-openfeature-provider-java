@@ -6,6 +6,7 @@ import dev.openfeature.sdk.ErrorCode
 import dev.openfeature.sdk.Reason
 import dev.openfeature.sdk.Value
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigDoubleValue
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigIntegerValue
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigStringValue
@@ -18,6 +19,7 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_valu
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AppConfigValueParseException
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AwsAppConfigParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.BooleanAttributeParser
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.DoubleAttributeParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.IntegerAttributeParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser
@@ -68,6 +70,9 @@ class AwsAppConfigClientServiceTest {
 
     @Mock
     private lateinit var integerAttributeParser: IntegerAttributeParser
+
+    @Mock
+    private lateinit var doubleAttributeParser: DoubleAttributeParser
 
     @Mock
     private lateinit var objectAttributeParser: ObjectAttributeParser
@@ -491,6 +496,195 @@ class AwsAppConfigClientServiceTest {
             // do
             assertThat(
                 awsAppConfigClientService.getInteger(
+                    /* key = */ key,
+                    /* defaultValue = */ defaultValue,
+                ),
+            ).isEqualTo(expected)
+
+            // verify
+            verifyNoInteractions(appConfigValueConfigValueConverter)
+        }
+    }
+
+    @Nested
+    inner class GetDouble {
+
+        @Test
+        fun normal() {
+            // prepare
+            val key = "key"
+            val defaultValue = 12345.0
+            val request = GetLatestConfigurationRequest.builder()
+                .configurationToken("token")
+                .build()
+            val configuration = mock<SdkBytes> {
+                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
+                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
+            }
+            val response = mock<GetLatestConfigurationResponse> {
+                on { configuration() } doReturn configuration
+            }
+            val flagValue = AppConfigDoubleValue::class.fixture()
+            val expected = PrimitiveEvaluationValue<Double>(
+                /* rawValue = */ 12345.0,
+                /* reason = */ Reason.TARGETING_MATCH,
+            )
+
+            doReturn(response)
+                .whenever(client)
+                .getLatestConfiguration(
+                    /* getLatestConfigurationRequest = */ request,
+                )
+            doReturn(flagValue)
+                .whenever(awsAppConfigParser)
+                .parse(
+                    /* key = */ key,
+                    /* value = */ """{ "foo": "bar" }""",
+                    /* buildAppConfigValue = */ doubleAttributeParser,
+                )
+            doReturn(
+                PrimitiveEvaluationValue<Double>(
+                    /* rawValue = */ 12345.0,
+                    /* reason = */ Reason.TARGETING_MATCH,
+                ),
+            )
+                .whenever(appConfigValueConfigValueConverter)
+                .toEvaluationValue(
+                    /* defaultValue = */ defaultValue,
+                    /* appConfigValue = */ flagValue,
+                    /* asPrimitive = */ true,
+                )
+
+            // do & verify
+            assertThat(
+                awsAppConfigClientService.getDouble(
+                    /* key = */ key,
+                    /* defaultValue = */ defaultValue,
+                ),
+            ).isEqualTo(expected)
+        }
+
+        @Test
+        fun `failed to request to AWS AppConfig`() {
+            // prepare
+            val key = "key"
+            val defaultValue = 12345.0
+            val request = GetLatestConfigurationRequest.builder()
+                .configurationToken("token")
+                .build()
+            val expected = ErrorEvaluationValue<Value>(
+                /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
+                /* errorMessage = */ null,
+                /* reason = */ Reason.DEFAULT,
+            )
+
+            doThrow(RuntimeException("error"))
+                .whenever(client)
+                .getLatestConfiguration(
+                    /* getLatestConfigurationRequest = */ request,
+                )
+
+            // do
+            assertThat(
+                awsAppConfigClientService.getDouble(
+                    /* key = */ key,
+                    /* defaultValue = */ defaultValue,
+                ),
+            ).isEqualTo(expected)
+
+            // verify
+            verifyNoInteractions(
+                awsAppConfigParser,
+                appConfigValueConfigValueConverter,
+                doubleAttributeParser,
+            )
+        }
+
+        @Test
+        fun `response body is null`() {
+            // prepare
+            val key = "key"
+            val defaultValue = 12345.0
+            val request = GetLatestConfigurationRequest.builder()
+                .configurationToken("token")
+                .build()
+            val configuration = mock<SdkBytes> {
+                on { asByteArray() } doReturn "".toByteArray()
+            }
+            val response = mock<GetLatestConfigurationResponse> {
+                on { configuration() } doReturn configuration
+            }
+            val expected = ErrorEvaluationValue<Value>(
+                /* errorCode = */ ErrorCode.PARSE_ERROR,
+                /* errorMessage = */ null,
+                /* reason = */ Reason.ERROR,
+            )
+
+            doReturn(response)
+                .whenever(client)
+                .getLatestConfiguration(
+                    /* getLatestConfigurationRequest = */ request,
+                )
+
+            // do
+            assertThat(
+                awsAppConfigClientService.getDouble(
+                    /* key = */ key,
+                    /* defaultValue = */ defaultValue,
+                ),
+            ).isEqualTo(expected)
+
+            // verify
+            verifyNoInteractions(
+                awsAppConfigParser,
+                appConfigValueConfigValueConverter,
+                doubleAttributeParser,
+            )
+        }
+
+        @Test
+        fun `failed to call parse`() {
+            // prepare
+            val key = "key"
+            val defaultValue = 12345.0
+            val request = GetLatestConfigurationRequest.builder()
+                .configurationToken("token")
+                .build()
+            val configuration = mock<SdkBytes> {
+                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
+                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
+            }
+            val response = mock<GetLatestConfigurationResponse> {
+                on { configuration() } doReturn configuration
+            }
+            val expected = ErrorEvaluationValue<Value>(
+                /* errorCode = */ ErrorCode.PARSE_ERROR,
+                /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
+                /* reason = */ Reason.ERROR,
+            )
+
+            doReturn(response)
+                .whenever(client)
+                .getLatestConfiguration(
+                    /* getLatestConfigurationRequest = */ request,
+                )
+            doThrow(
+                AppConfigValueParseException(
+                    /* response = */ """{ "foo": "bar" }""",
+                    /* errorMessage = */ "errorMessage",
+                    /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT,
+                ),
+            )
+                .whenever(awsAppConfigParser)
+                .parse(
+                    /* key = */ key,
+                    /* value = */ """{ "foo": "bar" }""",
+                    /* buildAppConfigValue = */ doubleAttributeParser,
+                )
+
+            // do
+            assertThat(
+                awsAppConfigClientService.getDouble(
                     /* key = */ key,
                     /* defaultValue = */ defaultValue,
                 ),
