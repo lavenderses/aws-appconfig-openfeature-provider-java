@@ -3,13 +3,13 @@ package io.github.lavenderses.aws_appconfig_openfeature_provider.plugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.withType
 
 class TestPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         with(target) {
-            with(tasks.getByName<Test>("test")) {
+            tasks.withType<Test>() {
                 useJUnitPlatform()
             }
 

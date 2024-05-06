@@ -2,7 +2,6 @@ package io.github.lavenderses.aws_appconfig_openfeature_provider.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
 
 class KotlinPlugin: Plugin<Project> {
 
@@ -16,6 +15,7 @@ class KotlinPlugin: Plugin<Project> {
 
             with(dependencies) {
                 implementation(libs.findLibrary("jackson-module-kotlin").get())
+                implementation(libs.findLibrary("kotlin-reflect").get())
             }
         }
     }

@@ -11,11 +11,14 @@ mockito = "4.11.0"
 # [for Java 8]
 mockito-kotlin = "4.1.0"
 openfeature = "1.7.6"
+spring-boot = "3.2.5"
 
 [plugins]
 detekt-gradle-plugin = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktlint-gradle-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
+kotlin-spring-plugin = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+spring-boot-plugin = { id = "org.springframework.boot", version.ref = "spring-boot" }
 
 # self plugin
 aws-appconfig-openfeature-provider-base = { id = "aws-appconfig-openfeature-provider-base", version = "unspecified" }
@@ -35,6 +38,7 @@ kotlin-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", v
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version = "2.23.1" }
 openfeature = { module = "dev.openfeature:sdk", version.ref = "openfeature" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 
 # plugin
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
