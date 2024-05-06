@@ -1,4 +1,4 @@
-package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
+package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +7,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import dev.openfeature.sdk.ImmutableStructure;
 import dev.openfeature.sdk.Structure;
 import dev.openfeature.sdk.Value;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValueKey;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
 import org.intellij.lang.annotations.Language;

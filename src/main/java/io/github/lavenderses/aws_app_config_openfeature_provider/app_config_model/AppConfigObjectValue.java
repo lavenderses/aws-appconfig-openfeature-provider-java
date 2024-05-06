@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 @EqualsAndHashCode(callSuper = true)
 public final class AppConfigObjectValue extends AppConfigValue<Value> {
 
-    AppConfigObjectValue(
+    public AppConfigObjectValue(
         @NotNull Boolean enabled,
         @NotNull Value value,
         @Language("json") @NotNull String jsonFormat
