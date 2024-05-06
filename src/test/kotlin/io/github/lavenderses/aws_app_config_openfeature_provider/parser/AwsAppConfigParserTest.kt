@@ -10,14 +10,21 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
 class AwsAppConfigParserTest {
 
     @InjectMocks
     private lateinit var awsAppConfigParser: AwsAppConfigParser
+
+    @Mock
+    private lateinit var buildAppConfigValue: BooleanAttributeParser
 
     @Spy
     private val objectMapper = ObjectMapperBuilder.build()
@@ -37,18 +44,51 @@ class AwsAppConfigParserTest {
                 }
               }
             """.trimIndent()
+            val responseNode = objectMapper.readTree(
+                // language=JSON
+                """
+              {
+                "key": {
+                  "enabled": true,
+                  "flag_value": true
+                }
+              }
+            """.trimIndent(),
+            )
+            val keyNode = objectMapper.readTree(
+                // language=JSON
+                """
+              {
+                "enabled": true,
+                "flag_value": true
+              }
+            """.trimIndent(),
+            )
             val expected = AppConfigBooleanValue(
                 /* enabled = */ true,
                 /* value = */ true,
                 /* jsonFormat = */ response,
             )
 
+            doReturn(
+                AppConfigBooleanValue(
+                    /* enabled = */ true,
+                    /* value = */ true,
+                    /* jsonFormat = */ response,
+                ),
+            )
+                .whenever(buildAppConfigValue)
+                .apply(
+                    /* responseNode = */ responseNode,
+                    /* keyNode = */ keyNode,
+                )
+
             // do & verify
             assertThat(
                 awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
-                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
+                    /* buildAppConfigValue = */ buildAppConfigValue,
                 ),
             ).isEqualTo(expected)
         }
@@ -71,12 +111,13 @@ class AwsAppConfigParserTest {
                 awsAppConfigParser.parse(
                     /* key = */ "key",
                     /* value = */ response,
-                    /* buildAppConfigValue = */ awsAppConfigParser::attributeAsBoolean,
+                    /* buildAppConfigValue = */ buildAppConfigValue,
                 )
             }
 
             // verify
             assertThat(e.evaluationResult).isEqualTo(EvaluationResult.FLAG_NOT_FOUND)
+            verifyNoInteractions(buildAppConfigValue)
         }
     }
 }
