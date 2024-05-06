@@ -2,7 +2,6 @@ package io.github.lavenderses.aws_app_config_openfeature_provider
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import com.fasterxml.jackson.databind.JsonNode
 import dev.openfeature.sdk.ErrorCode
 import dev.openfeature.sdk.Reason
 import dev.openfeature.sdk.Value
@@ -16,6 +15,8 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_valu
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.PrimitiveEvaluationValue
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AppConfigValueParseException
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AwsAppConfigParser
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.BooleanAttributeParser
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -23,10 +24,8 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
@@ -34,7 +33,6 @@ import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse
-import java.util.function.BiFunction
 
 @ExtendWith(MockitoExtension::class)
 class AwsAppConfigClientServiceTest {
@@ -58,6 +56,12 @@ class AwsAppConfigClientServiceTest {
     @Mock
     private lateinit var appConfigValueConfigValueConverter: AppConfigValueConverter
 
+    @Mock
+    private lateinit var booleanAttributeParser: BooleanAttributeParser
+
+    @Mock
+    private lateinit var objectAttributeParser: ObjectAttributeParser
+
     @Nested
     inner class GetBoolean {
 
@@ -70,8 +74,8 @@ class AwsAppConfigClientServiceTest {
                 .configurationToken("token")
                 .build()
             val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "abc".toByteArray()
-                on { asUtf8String() } doReturn "abc"
+                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
+                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
             }
             val response = mock<GetLatestConfigurationResponse> {
                 on { configuration() } doReturn configuration
@@ -90,9 +94,9 @@ class AwsAppConfigClientServiceTest {
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
                 .parse(
-                    /* key = */ eq(key),
-                    /* value = */ eq("abc"),
-                    /* buildAppConfigValue = */ any<BiFunction<JsonNode, JsonNode, AppConfigBooleanValue>>(),
+                    /* key = */ key,
+                    /* value = */ """{ "foo": "bar" }""",
+                    /* buildAppConfigValue = */ booleanAttributeParser,
                 )
             doReturn(
                 PrimitiveEvaluationValue<Boolean>(
@@ -129,8 +133,8 @@ class AwsAppConfigClientServiceTest {
                 .configurationToken("token")
                 .build()
             val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "abc".toByteArray()
-                on { asUtf8String() } doReturn "abc"
+                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
+                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
             }
             val response = mock<GetLatestConfigurationResponse> {
                 on { configuration() } doReturn configuration
@@ -149,9 +153,9 @@ class AwsAppConfigClientServiceTest {
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
                 .parse(
-                    /* key = */ eq(key),
-                    /* value = */ eq("abc"),
-                    /* buildAppConfigValue = */ any<BiFunction<JsonNode, JsonNode, AppConfigObjectValue>>(),
+                    /* key = */ key,
+                    /* value = */ """{ "foo": "bar" }""",
+                    /* buildAppConfigValue = */ objectAttributeParser,
                 )
             doReturn(
                 ObjectEvaluationValue<Boolean>(
@@ -254,15 +258,15 @@ class AwsAppConfigClientServiceTest {
                 .configurationToken("token")
                 .build()
             val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "abc".toByteArray()
-                on { asUtf8String() } doReturn "abc"
+                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
+                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
             }
             val response = mock<GetLatestConfigurationResponse> {
                 on { configuration() } doReturn configuration
             }
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
-                /* errorMessage = */ "errorMessage. Response from AWS AppConfig: abc",
+                /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
                 /* reason = */ Reason.ERROR,
             )
 
@@ -273,16 +277,16 @@ class AwsAppConfigClientServiceTest {
                 )
             doThrow(
                 AppConfigValueParseException(
-                    /* response = */ "abc",
+                    /* response = */ """{ "foo": "bar" }""",
                     /* errorMessage = */ "errorMessage",
                     /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT,
                 ),
             )
                 .whenever(awsAppConfigParser)
                 .parse(
-                    /* key = */ eq(key),
-                    /* value = */ eq("abc"),
-                    /* buildAppConfigValue = */ any<BiFunction<JsonNode, JsonNode, AppConfigObjectValue>>(),
+                    /* key = */ key,
+                    /* value = */ """{ "foo": "bar" }""",
+                    /* buildAppConfigValue = */ objectAttributeParser,
                 )
 
             // do
