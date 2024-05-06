@@ -7,9 +7,9 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="AWSAppConfig-openfeature-provider-java.main" />
-        <module name="AWSAppConfig-openfeature-provider-java.testFixtures" />
-        <module name="AWSAppConfig-openfeature-provider-java.test" />
+        <module name="AWSAppConfig-openfeature-provider-java.core.main" />
+        <module name="AWSAppConfig-openfeature-provider-java.core.test" />
+        <module name="AWSAppConfig-openfeature-provider-java.core.testFixtures" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />
