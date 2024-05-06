@@ -47,22 +47,22 @@ class AwsAppConfigParserTest {
             val responseNode = objectMapper.readTree(
                 // language=JSON
                 """
-              {
-                "key": {
-                  "enabled": true,
-                  "flag_value": true
-                }
-              }
-            """.trimIndent(),
+                  {
+                    "key": {
+                      "enabled": true,
+                      "flag_value": true
+                    }
+                  }
+                """.trimIndent(),
             )
             val keyNode = objectMapper.readTree(
                 // language=JSON
                 """
-              {
-                "enabled": true,
-                "flag_value": true
-              }
-            """.trimIndent(),
+                  {
+                    "enabled": true,
+                    "flag_value": true
+                  }
+                """.trimIndent(),
             )
             val expected = AppConfigBooleanValue(
                 /* enabled = */ true,
