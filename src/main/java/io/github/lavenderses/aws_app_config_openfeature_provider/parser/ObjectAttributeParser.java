@@ -6,8 +6,6 @@ import dev.openfeature.sdk.Structure;
 import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValueKey;
-import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -37,14 +35,10 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
         @NotNull JsonNode responseNode,
         @NotNull JsonNode keyNode
     ) {
-        final JsonNode flagValueNode = keyNode.get(AppConfigValueKey.FLAG_VALUE.getKey());
-        if (isNull(flagValueNode) || flagValueNode.isNull()) {
-            throw new AppConfigValueParseException(
-                /* response = */ keyNode.toString(),
-                /* errorMessage = */ "`flag_value` should exist",
-                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
-            );
-        }
+        final JsonNode flagValueNode = getValidFlagValueNode(
+            /* keyNode = */ keyNode,
+            /* expectedNodeType = */ null
+        );
 
         // add JSON node's value recursively
         final HashMap<String, Value> hashMap = new HashMap<>();
