@@ -13,6 +13,7 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.converter.AppCo
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.BooleanAttributeParser;
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.DoubleAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.IntegerAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser;
@@ -63,6 +64,9 @@ final class AwsAppConfigClientService {
     private final IntegerAttributeParser integerAttributeParser;
 
     @NotNull
+    private final DoubleAttributeParser doubleAttributeParser;
+
+    @NotNull
     private final ObjectAttributeParser objectAttributeParser;
 
     /**
@@ -79,6 +83,7 @@ final class AwsAppConfigClientService {
         @NotNull final BooleanAttributeParser booleanAttributeParser,
         @NotNull final StringAttributeParser stringAttributeParser,
         @NotNull final IntegerAttributeParser integerAttributeParser,
+        @NotNull final DoubleAttributeParser doubleAttributeParser,
         @NotNull final ObjectAttributeParser objectAttributeParser
     ) {
         this.client = requireNonNull(client, "AppConfigDataClient");
@@ -88,6 +93,7 @@ final class AwsAppConfigClientService {
         this.booleanAttributeParser = requireNonNull(booleanAttributeParser, "booleanAttributeParser");
         this.stringAttributeParser = requireNonNull(stringAttributeParser, "stringAttributeParser");
         this.integerAttributeParser = requireNonNull(integerAttributeParser, "integerAttributeParser");
+        this.doubleAttributeParser = requireNonNull(doubleAttributeParser, "doubleAttributeParser");
         this.objectAttributeParser = requireNonNull(objectAttributeParser, "objectAttributeParser");
     }
 
@@ -109,6 +115,7 @@ final class AwsAppConfigClientService {
         booleanAttributeParser = new BooleanAttributeParser();
         stringAttributeParser = new StringAttributeParser();
         integerAttributeParser = new IntegerAttributeParser();
+        doubleAttributeParser = new DoubleAttributeParser();
         objectAttributeParser = new ObjectAttributeParser();
     }
 
@@ -187,8 +194,25 @@ final class AwsAppConfigClientService {
     }
 
     @NotNull
-    EvaluationValue<Double> getDouble(@NotNull final String key) {
-      return null;
+    EvaluationValue<Double> getDouble(
+        @NotNull final String key,
+        @NotNull final Double defaultValue
+    ) {
+        try {
+            return getInternal(
+                /* key = */ key,
+                /* defaultValue = */ defaultValue,
+                /* asPrimitive = */ true,
+                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
+                    /* key = */ key,
+                    /* value = */ responseBody,
+                    /* buildAppConfigValue = */ doubleAttributeParser
+                )
+            );
+        } catch (final AppConfigValueParseException e) {
+            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            return e.asErrorEvaluationResult();
+        }
     }
 
     @NotNull
