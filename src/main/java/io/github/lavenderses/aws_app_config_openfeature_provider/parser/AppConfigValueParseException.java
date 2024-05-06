@@ -1,4 +1,4 @@
-package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
+package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;

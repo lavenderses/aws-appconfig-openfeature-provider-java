@@ -1,4 +1,4 @@
-package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model
+package io.github.lavenderses.aws_app_config_openfeature_provider.parser
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import dev.openfeature.sdk.ImmutableStructure
 import dev.openfeature.sdk.Value
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult
 import io.github.lavenderses.aws_app_config_openfeature_provider.helper.Time
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder
