@@ -1,0 +1,59 @@
+[versions]
+aws-sdk = "2.25.44"
+detekt = "1.23.6"
+jackson = "2.16.0"
+kotlin = "1.9.21"
+kotlin-coroutine = "1.7.3"
+ktlint = "1.2.1"
+ktlint-gradle = "11.6.1"
+# [for Java 8]
+mockito = "4.11.0"
+# [for Java 8]
+mockito-kotlin = "4.1.0"
+openfeature = "1.7.6"
+spring-boot = "3.2.5"
+
+[plugins]
+detekt-gradle-plugin = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktlint-gradle-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
+kotlin-spring-plugin = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+spring-boot-plugin = { id = "org.springframework.boot", version.ref = "spring-boot" }
+
+# self plugin
+aws-appconfig-openfeature-provider-base = { id = "aws-appconfig-openfeature-provider-base", version = "unspecified" }
+aws-appconfig-openfeature-provider-java = { id = "aws-appconfig-openfeature-provider-java", version = "unspecified" }
+aws-appconfig-openfeature-provider-kotlin = { id = "aws-appconfig-openfeature-provider-kotlin", version = "unspecified" }
+aws-appconfig-openfeature-provider-lint-kotlin = { id = "aws-appconfig-openfeature-provider-lint-kotlin", version = "unspecified" }
+aws-appconfig-openfeature-provider-test = { id = "aws-appconfig-openfeature-provider-test", version = "unspecified" }
+
+[libraries]
+aws-bom = { module = "software.amazon.awssdk:bom", version.ref = "aws-sdk" }
+aws-appconfigdata = { module = "software.amazon.awssdk:appconfigdata" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version = "3.0.5" }
+kotlin-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
+log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version = "2.23.1" }
+openfeature = { module = "dev.openfeature:sdk", version.ref = "openfeature" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+
+# plugin
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+lombok-gradle-plugin  = { module = "io.freefair.gradle:lombok-plugin", version = "8.6" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-gradle" }
+spotbugs-gradle-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.0.14" }
+
+# testing
+assertk = { module = "com.willowtreeapps.assertk:assertk", version = "0.28.1" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
+mockito-bom = { module = "org.mockito:mockito-bom", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
+mockito-inline = { module = "org.mockito:mockito-inline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }

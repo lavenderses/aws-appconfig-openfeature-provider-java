@@ -1,8 +1,7 @@
-rootProject.name = "AWSAppConfig-openfeature-provider-java"
-
 pluginManagement {
     repositories {
         mavenCentral()
+        google()
         gradlePluginPortal()
     }
 }
@@ -16,8 +15,11 @@ dependencyResolutionManagement {
         google()
         gradlePluginPortal()
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
 }
 
-include(":core")
-
-includeBuild("build-logic")
+rootProject.name = "build-logic"
