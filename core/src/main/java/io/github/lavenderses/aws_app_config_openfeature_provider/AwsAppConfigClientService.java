@@ -17,17 +17,15 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.parser.DoubleAt
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.IntegerAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser;
-import io.github.lavenderses.aws_app_config_openfeature_provider.utils.AwsAppConfigClientBuilder;
+import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxy;
+import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxyBuilder;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
-import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest;
-import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -43,10 +41,7 @@ final class AwsAppConfigClientService {
     private final AtomicReference<AwsAppConfigState> appConfigState = new AtomicReference<>(AwsAppConfigState.NONE);
 
     @NotNull
-    private final AppConfigDataClient client;
-
-    @NotNull
-    private final AwsAppConfigClientOptions options;
+    private final AwsAppConfigProxy awsAppConfigProxy;
 
     @NotNull
     private final AwsAppConfigParser awsAppConfigParser;
@@ -76,8 +71,7 @@ final class AwsAppConfigClientService {
      */
     @VisibleForTesting
     AwsAppConfigClientService(
-        @NotNull final AppConfigDataClient client,
-        @NotNull final AwsAppConfigClientOptions options,
+        @NotNull final AwsAppConfigProxy awsAppConfigProxy,
         @NotNull final AwsAppConfigParser awsAppConfigParser,
         @NotNull final AppConfigValueConverter appConfigValueConverter,
         @NotNull final BooleanAttributeParser booleanAttributeParser,
@@ -86,8 +80,7 @@ final class AwsAppConfigClientService {
         @NotNull final DoubleAttributeParser doubleAttributeParser,
         @NotNull final ObjectAttributeParser objectAttributeParser
     ) {
-        this.client = requireNonNull(client, "AppConfigDataClient");
-        this.options = requireNonNull(options, "AwsAppConfigClientOptions");
+        this.awsAppConfigProxy = requireNonNull(awsAppConfigProxy, "awsAppConfigProxy");
         this.awsAppConfigParser = requireNonNull(awsAppConfigParser, "AwsAppConfigParse");
         this.appConfigValueConverter = requireNonNull(appConfigValueConverter, "appConfigValueConverter");
         this.booleanAttributeParser = requireNonNull(booleanAttributeParser, "booleanAttributeParser");
@@ -108,8 +101,9 @@ final class AwsAppConfigClientService {
     AwsAppConfigClientService(@NotNull final AwsAppConfigClientOptions options) {
         log.info("Initializing AWS AppConfig with config: {}", options);
 
-        this.options = requireNonNull(options, "awsAppConfigClientOptions");
-        client = AwsAppConfigClientBuilder.build(options);
+        awsAppConfigProxy = AwsAppConfigProxyBuilder.build(
+            /* options = */ options
+        );
         awsAppConfigParser = new AwsAppConfigParser();
         appConfigValueConverter = new AppConfigValueConverter();
         booleanAttributeParser = new BooleanAttributeParser();
@@ -257,14 +251,11 @@ final class AwsAppConfigClientService {
         final boolean asPrimitive,
         @NotNull final Function<String, V> parseFromResponseBody
     ) {
-        // Get configuration from AWS AppConfig via SDK
-        final GetLatestConfigurationRequest request = GetLatestConfigurationRequest.builder()
-            .configurationToken(options.getApplicationName())
-            .build();
-
-        final GetLatestConfigurationResponse response;
+        final String responseBody;
         try {
-            response = client.getLatestConfiguration(request);
+            responseBody = awsAppConfigProxy.getRawFlagObject(
+                /* key = */ key
+            );
         } catch (final Exception e) {
             log.error("Failed to get response from AppConfig.", e);
 
@@ -274,11 +265,6 @@ final class AwsAppConfigClientService {
                 /* reason = */ Reason.DEFAULT
             );
         }
-
-        final String responseBody = extractResponseBody(
-            /* key = */ key,
-            /* response = */ response
-        );
         if (isNull(responseBody)) {
             return parseErrorEvaluationValue(
                 /* errorMessage = */ null
@@ -297,26 +283,6 @@ final class AwsAppConfigClientService {
             // true because this is boolean flag
             /* asPrimitive = */ asPrimitive
         );
-    }
-
-    /**
-     * @param key feature flag key in OpenFeature world
-     * @param response SDK response object
-     * @return JSON string when repose is valid, otherwise null
-     */
-    @Nullable
-    private String extractResponseBody(
-        @NotNull final String key,
-        @NotNull final GetLatestConfigurationResponse response
-    ) {
-        final SdkBytes configuration = response.configuration();
-        if (isNull(configuration) || configuration.asByteArray().length == 0) {
-            log.info("Flag value from AppConfig with key {} does not found.", key);
-
-            return null;
-        }
-
-        return configuration.asUtf8String();
     }
 
     private <T> EvaluationValue<T> parseErrorEvaluationValue(@Nullable final String errorMessage) {
