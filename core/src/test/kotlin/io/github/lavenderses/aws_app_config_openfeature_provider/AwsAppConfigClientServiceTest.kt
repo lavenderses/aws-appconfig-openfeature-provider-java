@@ -34,7 +34,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
-import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest
 
 @ExtendWith(MockitoExtension::class)
 class AwsAppConfigClientServiceTest {
@@ -486,9 +485,6 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345.0
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
                 /* errorMessage = */ null,

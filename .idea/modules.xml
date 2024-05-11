@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/AWSAppConfig-openfeature-provider-java.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/AWSAppConfig-openfeature-provider-java.core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/build-logic/build-logic.main.iml" filepath="$PROJECT_DIR$/.idea/modules/build-logic/build-logic.main.iml" />
     </modules>
   </component>

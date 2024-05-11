@@ -24,17 +24,6 @@ class StringAttributeParserTest {
     @Test
     fun normal() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true,
-                  "flag_value": "test"
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -47,13 +36,12 @@ class StringAttributeParserTest {
         val expected = AppConfigStringValue(
             /* enabled = */ true,
             /* value = */ "test",
-            /* jsonFormat = */ """{"key":{"enable":true,"flag_value":"test"}}""",
+            /* jsonFormat = */ """{"enable":true,"flag_value":"test"}""",
         )
 
         // do & verify
         assertThat(
             stringAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -62,7 +50,6 @@ class StringAttributeParserTest {
     @Test
     fun `enable is false`() {
         // prepare
-        // language=JSON
         val responseNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -86,13 +73,12 @@ class StringAttributeParserTest {
         val expected = AppConfigStringValue(
             /* enabled = */ false,
             /* value = */ "test",
-            /* jsonFormat = */ """{"key":{"enable":true,"flag_value":"test"}}""",
+            /* jsonFormat = */ """{"enable":true,"flag_value":"test"}""",
         )
 
         // do & verify
         assertThat(
             stringAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -101,16 +87,6 @@ class StringAttributeParserTest {
     @Test
     fun `flag_value is null`() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -123,7 +99,6 @@ class StringAttributeParserTest {
         // do
         val e = assertThrows<AppConfigValueParseException> {
             stringAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             )
         }

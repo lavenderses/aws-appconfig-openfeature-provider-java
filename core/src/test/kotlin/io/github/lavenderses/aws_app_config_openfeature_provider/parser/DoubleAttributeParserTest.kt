@@ -24,17 +24,6 @@ class DoubleAttributeParserTest {
     @Test
     fun normal() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true,
-                  "flag_value": 12345.0
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -48,13 +37,12 @@ class DoubleAttributeParserTest {
             AppConfigDoubleValue(
                 /* enabled = */ true,
                 /* value = */ 12345.0,
-                /* jsonFormat = */ """{"key":{"enable":true,"flag_value":12345.0}}""",
+                /* jsonFormat = */ """{"enable":true,"flag_value":12345.0}""",
             )
 
         // do & verify
         assertThat(
             doubleAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -63,18 +51,6 @@ class DoubleAttributeParserTest {
     @Test
     fun `enable is false`() {
         // prepare
-        // language=JSON
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": false,
-                  "flag_value": 12345.0
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -88,13 +64,12 @@ class DoubleAttributeParserTest {
             AppConfigDoubleValue(
                 /* enabled = */ false,
                 /* value = */ 12345.0,
-                /* jsonFormat = */ """{"key":{"enable":true,"flag_value":12345.0}}""",
+                /* jsonFormat = */ """{"enable":true,"flag_value":12345.0}""",
             )
 
         // do & verify
         assertThat(
             doubleAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -103,16 +78,6 @@ class DoubleAttributeParserTest {
     @Test
     fun `flag_value is null`() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -125,7 +90,6 @@ class DoubleAttributeParserTest {
         // do
         val e = assertThrows<AppConfigValueParseException> {
             doubleAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             )
         }

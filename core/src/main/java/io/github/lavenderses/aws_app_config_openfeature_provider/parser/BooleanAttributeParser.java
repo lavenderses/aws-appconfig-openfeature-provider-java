@@ -19,7 +19,6 @@ public final class BooleanAttributeParser extends AbstractAttributeParser<Boolea
      */
     @Override
     public AppConfigBooleanValue apply(
-        @NotNull JsonNode responseNode,
         @NotNull JsonNode keyNode
     ) {
         final JsonNode flagValueNode = getValidFlagValueNode(
@@ -30,7 +29,7 @@ public final class BooleanAttributeParser extends AbstractAttributeParser<Boolea
         return new AppConfigBooleanValue(
             /* enabled = */ enabled(keyNode),
             /* value = */ flagValueNode.asBoolean(),
-            /* responseNode = */ responseNode.toString()
+            /* responseNode = */ keyNode.toString()
         );
     }
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigDoubleValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigIntegerValue;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,7 +21,6 @@ public final class DoubleAttributeParser extends AbstractAttributeParser<Double,
      */
     @Override
     public AppConfigDoubleValue apply(
-        @NotNull JsonNode responseNode,
         @NotNull JsonNode keyNode
     ) {
         final JsonNode flagValueNode = getValidFlagValueNode(
@@ -33,7 +31,7 @@ public final class DoubleAttributeParser extends AbstractAttributeParser<Double,
         return new AppConfigDoubleValue(
             /* enabled = */ enabled(keyNode),
             /* value = */ flagValueNode.asDouble(),
-            /* responseNode = */ responseNode.toString()
+            /* responseNode = */ keyNode.toString()
         );
     }
 }

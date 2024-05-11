@@ -24,17 +24,6 @@ class BooleanAttributeParserTest {
     @Test
     fun normal() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true,
-                  "flag_value": true
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -47,13 +36,12 @@ class BooleanAttributeParserTest {
         val expected = AppConfigBooleanValue(
             /* enabled = */ true,
             /* value = */ true,
-            /* jsonFormat = */ """{"key":{"enable":true,"flag_value":true}}""",
+            /* jsonFormat = */ """{"enable":true,"flag_value":true}""",
         )
 
         // do & verify
         assertThat(
             booleanAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -62,18 +50,6 @@ class BooleanAttributeParserTest {
     @Test
     fun `enable is false`() {
         // prepare
-        // language=JSON
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": false,
-                  "flag_value": true
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -86,13 +62,12 @@ class BooleanAttributeParserTest {
         val expected = AppConfigBooleanValue(
             /* enabled = */ false,
             /* value = */ true,
-            /* jsonFormat = */ """{"key":{"enable":true,"flag_value":false}}""",
+            /* jsonFormat = */ """{"enable":true,"flag_value":true}""",
         )
 
         // do & verify
         assertThat(
             booleanAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             ),
         ).isEqualTo(expected)
@@ -101,16 +76,6 @@ class BooleanAttributeParserTest {
     @Test
     fun `flag_value is null`() {
         // prepare
-        val responseNode = OBJECT_MAPPER.readTree(
-            // language=JSON
-            """
-              {
-                "key": {
-                  "enabled": true
-                }
-              }
-            """.trimIndent(),
-        )
         val keyNode = OBJECT_MAPPER.readTree(
             // language=JSON
             """
@@ -123,7 +88,6 @@ class BooleanAttributeParserTest {
         // do
         val e = assertThrows<AppConfigValueParseException> {
             booleanAttributeParser.apply(
-                /* responseNode = */ responseNode,
                 /* keyNode = */ keyNode,
             )
         }

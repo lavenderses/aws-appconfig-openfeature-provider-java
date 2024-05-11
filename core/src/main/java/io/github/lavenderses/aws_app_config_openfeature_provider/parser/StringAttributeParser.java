@@ -20,7 +20,6 @@ public final class StringAttributeParser extends AbstractAttributeParser<String,
      */
     @Override
     public AppConfigStringValue apply(
-        @NotNull JsonNode responseNode,
         @NotNull JsonNode keyNode
     ) {
         final JsonNode flagValueNode = getValidFlagValueNode(
@@ -31,7 +30,7 @@ public final class StringAttributeParser extends AbstractAttributeParser<String,
         return new AppConfigStringValue(
             /* enabled = */ enabled(keyNode),
             /* value = */ flagValueNode.asText(),
-            /* responseNode = */ responseNode.toString()
+            /* responseNode = */ keyNode.toString()
         );
     }
 }

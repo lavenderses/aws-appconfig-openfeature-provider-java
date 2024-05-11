@@ -11,9 +11,8 @@ import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -46,7 +45,7 @@ public final class AwsAppConfigParser {
      *
      * @param key feature flag key value in {@link AppConfigValueKey} ({@code "feature flag key name in OpenFeature"})
      * @param value JSON response from AWS AppConfig
-     * @param buildAppConfigValue build {@link V} from (request JSON body, key object in response body)
+     * @param buildAppConfigValue build {@link V} from request JSON body
      * @return {@link T}-typed feature flag implementation of {@link AppConfigValue}. Once returned value successfully,
      * it is guaranteed that JSON response satisfies ALL spec of this Provider's spec, and success to evaluation feature
      * flag.
@@ -57,33 +56,23 @@ public final class AwsAppConfigParser {
     public <T, V extends AppConfigValue<T>> V parse(
         @NotNull final String key,
         @Language("json") @NotNull final String value,
-        @NotNull final BiFunction<JsonNode, JsonNode, V> buildAppConfigValue
+        @NotNull final Function<JsonNode, V> buildAppConfigValue
     ) {
         requireNonNull(key, "key");
         requireNonNull(value, "value");
 
-        final JsonNode responseNode;
+        final JsonNode keyNode;
         try {
-            responseNode = objectMapper.readTree(value);
+            keyNode = objectMapper.readTree(value);
         } catch (JsonProcessingException e) {
             throw new AppConfigValueParseException(
                 /* response = */ value,
                 /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
             );
         }
-        requireNonNull(responseNode, "responseNode");
-
-        // get key node from response
-        final JsonNode keyNode = responseNode.get(key);
-        if (isNull(keyNode)) {
-            throw new AppConfigValueParseException(
-                /* response = */ value,
-                /* evaluationResult = */ EvaluationResult.FLAG_NOT_FOUND
-            );
-        }
+        requireNonNull(keyNode, "responseNode");
 
         return buildAppConfigValue.apply(
-            /* t = */ responseNode,
             /* v = */ keyNode
         );
     }
