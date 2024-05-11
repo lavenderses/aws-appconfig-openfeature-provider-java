@@ -43,17 +43,18 @@ class BasePlugin : Plugin<Project> {
 
             with(dependencies) {
                 // third party
-                api(libs.findLibrary("jetbrains-annotations").get())
-                api(libs.findLibrary("log4j-slf4j2-impl").get())
-                api(libs.findLibrary("slf4j-api").get())
+                compileOnly(libs.findLibrary("jetbrains-annotations").get())
+                compileOnly(libs.findLibrary("log4j-slf4j2-impl").get())
+                compileOnly(libs.findLibrary("slf4j-api").get())
 
                 // bom
                 implementation(platform(libs.findLibrary("aws-bom").get()))
             }
 
             tasks.withType<Jar> {
+                println("aws-app-config-openfeature-provider-java-${project.name}")
                 group = "io.github.lavenderses"
-                archiveBaseName.set("aws-app-config-openfeature-provider-java")
+                archiveBaseName.set("aws-app-config-openfeature-provider-java-${project.name}")
             }
         }
     }

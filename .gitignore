@@ -7,3 +7,5 @@ build
 # IDEA
 /.idea/dbnavigator.xml
 /.idea/modules
+
+access.log

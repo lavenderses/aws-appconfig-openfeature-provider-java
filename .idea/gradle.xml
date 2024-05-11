@@ -21,6 +21,10 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/integration-test" />
+            <option value="$PROJECT_DIR$/integration-test/app" />
+            <option value="$PROJECT_DIR$/integration-test/model" />
+            <option value="$PROJECT_DIR$/integration-test/testing" />
           </set>
         </option>
       </GradleProjectSettings>

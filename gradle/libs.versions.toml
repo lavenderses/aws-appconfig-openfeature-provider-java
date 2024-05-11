@@ -1,24 +1,22 @@
 [versions]
+armeria = "1.28.4"
 aws-sdk = "2.25.44"
 detekt = "1.23.6"
 jackson = "2.16.0"
 kotlin = "1.9.21"
 kotlin-coroutine = "1.7.3"
+kotlin-logging = "6.0.9"
 ktlint = "1.2.1"
 ktlint-gradle = "11.6.1"
-# [for Java 8]
-mockito = "4.11.0"
-# [for Java 8]
-mockito-kotlin = "4.1.0"
+mockito = "4.11.0" # for Java 8
+mockito-kotlin = "4.1.0" # for Java 8
 openfeature = "1.7.6"
-spring-boot = "3.2.5"
 
 [plugins]
 detekt-gradle-plugin = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+jib-plugin = { id = "com.google.cloud.tools.jib", version = "3.4.2" } # integration test
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktlint-gradle-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
-kotlin-spring-plugin = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-spring-boot-plugin = { id = "org.springframework.boot", version.ref = "spring-boot" }
 
 # self plugin
 aws-appconfig-openfeature-provider-base = { id = "aws-appconfig-openfeature-provider-base", version = "unspecified" }
@@ -28,17 +26,27 @@ aws-appconfig-openfeature-provider-lint-kotlin = { id = "aws-appconfig-openfeatu
 aws-appconfig-openfeature-provider-test = { id = "aws-appconfig-openfeature-provider-test", version = "unspecified" }
 
 [libraries]
+# core
 aws-bom = { module = "software.amazon.awssdk:bom", version.ref = "aws-sdk" }
 aws-appconfigdata = { module = "software.amazon.awssdk:appconfigdata" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
-kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version = "3.0.5" }
-kotlin-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version = "2.23.1" }
 openfeature = { module = "dev.openfeature:sdk", version.ref = "openfeature" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
-spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+
+# Kotlin (not in core package)
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+kotlin-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
+kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
+slf4j-log4j2 = { module = "org.slf4j:slf4j-log4j12"}
+
+# integration test
+armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
+armeria = { module = "com.linecorp.armeria:armeria" }
+armeria-kotlin = { module = "com.linecorp.armeria:armeria-kotlin" }
+jsonasesrt = { module = "org.skyscreamer:jsonassert", version = "1.5.1" }
 
 # plugin
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }

@@ -16,6 +16,11 @@ class KotlinPlugin: Plugin<Project> {
             with(dependencies) {
                 implementation(libs.findLibrary("jackson-module-kotlin").get())
                 implementation(libs.findLibrary("kotlin-reflect").get())
+                implementation(libs.findLibrary("kotlin-logging").get())
+                implementation(libs.findLibrary("kotlin-logging-jvm").get())
+                // Kotlin plugin is for subproject, not exported.
+                runtimeOnly(libs.findLibrary("log4j-slf4j2-impl").get())
+                runtimeOnly(libs.findLibrary("slf4j-api").get())
             }
         }
     }

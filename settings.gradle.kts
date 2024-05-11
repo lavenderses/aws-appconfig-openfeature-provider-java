@@ -19,5 +19,9 @@ dependencyResolutionManagement {
 }
 
 include(":core")
+include(":integration-test")
+include(":integration-test:app")
+include(":integration-test:model")
+include(":integration-test:testing")
 
 includeBuild("build-logic")
