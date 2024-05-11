@@ -34,17 +34,6 @@ class ObjectAttributeParserTest {
         @Test
         fun normal() {
             // prepare
-            val responseNode = OBJECT_MAPPER.readTree(
-                // language=JSON
-                """
-                  {
-                    "key": {
-                      "enabled": true,
-                      "flag_value": 12345
-                    }
-                  }
-                """.trimIndent(),
-            )
             val keyNode = OBJECT_MAPPER.readTree(
                 // language=JSON
                 """
@@ -57,13 +46,12 @@ class ObjectAttributeParserTest {
             val expected = AppConfigObjectValue(
                 /* enabled = */ true,
                 /* value = */ Value(12345),
-                /* jsonFormat = */ """{"key":{"enable":true,"flag_value":12345}}""",
+                /* jsonFormat = */ """{"enable":true,"flag_value":12345}""",
             )
 
             // do & verify
             assertThat(
                 objectAttributeParser.apply(
-                    /* responseNode = */ responseNode,
                     /* keyNode = */ keyNode,
                 ),
             ).isEqualTo(expected)
@@ -72,17 +60,6 @@ class ObjectAttributeParserTest {
         @Test
         fun `enable is false`() {
             // prepare
-            val responseNode = OBJECT_MAPPER.readTree(
-                // language=JSON
-                """
-                  {
-                    "key": {
-                      "enabled": false,
-                      "flag_value": 12345
-                    }
-                  }
-                """.trimIndent(),
-            )
             val keyNode = OBJECT_MAPPER.readTree(
                 // language=JSON
                 """
@@ -95,13 +72,12 @@ class ObjectAttributeParserTest {
             val expected = AppConfigObjectValue(
                 /* enabled = */ false,
                 /* value = */ Value(12345),
-                /* jsonFormat = */ """{"key":{"enable":false,"flag_value":12345}}""",
+                /* jsonFormat = */ """{"enable":false,"flag_value":12345}""",
             )
 
             // do & verify
             assertThat(
                 objectAttributeParser.apply(
-                    /* responseNode = */ responseNode,
                     /* keyNode = */ keyNode,
                 ),
             ).isEqualTo(expected)
@@ -110,16 +86,6 @@ class ObjectAttributeParserTest {
         @Test
         fun `flag_value is null`() {
             // prepare
-            val responseNode = OBJECT_MAPPER.readTree(
-                // language=JSON
-                """
-                  {
-                    "key": {
-                      "enabled": true
-                    }
-                  }
-                """.trimIndent(),
-            )
             val keyNode = OBJECT_MAPPER.readTree(
                 // language=JSON
                 """
@@ -132,7 +98,6 @@ class ObjectAttributeParserTest {
             // do
             val e = assertThrows<AppConfigValueParseException> {
                 objectAttributeParser.apply(
-                    /* responseNode = */ responseNode,
                     /* keyNode = */ keyNode,
                 )
             }
@@ -220,16 +185,14 @@ class ObjectAttributeParserTest {
                 // language=JSON
                 """
                   {
-                    "flag_value": {
-                      "foo": {
-                        "bar": {
-                          "qux": 12345
-                        },
-                        "quux": true
+                    "foo": {
+                      "bar": {
+                        "qux": 12345
                       },
-                      "corge": "98765",
-                      "grault": "${Time.FIXED_TIME}"
-                    }
+                      "quux": true
+                    },
+                    "corge": "98765",
+                    "grault": "${Time.FIXED_TIME}"
                   }
                 """.trimIndent(),
             )
