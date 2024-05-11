@@ -1,0 +1,27 @@
+{
+  "string": {
+    "enabled": true,
+    "flag_value": "VALUE"
+  },
+  "boolean": {
+    "enabled": true,
+    "flag_value": true
+  },
+  "int": {
+    "enabled": false,
+    "flag_value": 12345
+  },
+  "double": {
+    "enabled": true,
+    "flag_value": 98765.432
+  },
+  "objectValue": {
+    "enabled": false,
+    "flag_value": {
+      "nested": {
+        "this is": "value"
+      },
+      "normal": "value"
+    }
+  }
+}
