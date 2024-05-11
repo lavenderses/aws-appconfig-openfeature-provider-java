@@ -32,7 +32,6 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
      */
     @Override
     public AppConfigObjectValue apply(
-        @NotNull JsonNode responseNode,
         @NotNull JsonNode keyNode
     ) {
         final JsonNode flagValueNode = getValidFlagValueNode(
@@ -51,7 +50,7 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
         return new AppConfigObjectValue(
             /* enabled = */ enabled(keyNode),
             /* value = */ value,
-            /* responseNode = */ responseNode.toString()
+            /* responseNode = */ keyNode.toString()
         );
     }
 

@@ -51,7 +51,7 @@ abstract class AbstractAttributeParser<T, V extends AppConfigValue<T>> implement
     }
 
     /**
-     * Get feature flag value node ({@code "$.{key_name}.flag_value"} in JSON).<br/>
+     * Get feature flag value node ({@code "$.flag_value"} in JSON.<br/>
      * e.g. When AWS AppConfig is following (feature flag key name is {@code flag_key}, and feature flag value is
      * number type {@code 12345})...
      * <pre>
@@ -63,7 +63,8 @@ abstract class AbstractAttributeParser<T, V extends AppConfigValue<T>> implement
      *     }
      * }}
      * </pre>
-     * Parameter keyNode is the {@link JsonNode} of following JSON string.
+     * Parameter keyNode is the {@link JsonNode} of following JSON string. <b>THIS IS SAME AS JSON RESPONSE FROM AWS
+     * AppConfig WHEN FEATURE FLAG KEY IS SPECIFIED.</b>
      * <pre>
      * {@code
      * {

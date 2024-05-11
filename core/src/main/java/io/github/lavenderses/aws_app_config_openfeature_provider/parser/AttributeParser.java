@@ -3,7 +3,7 @@ package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Parser interface for {@link T}-typed feature flag value from AWS AppConfig JSON response.<br/>
@@ -14,4 +14,4 @@ import java.util.function.BiFunction;
  * @param <T> feature flag type in OpenFeature requirements, such as boolean
  * @param <V> {@link T}-typed {@link AppConfigValue}. this will be returned.
  */
-interface AttributeParser<T, V extends AppConfigValue<T>> extends BiFunction<JsonNode, JsonNode, V> {}
+interface AttributeParser<T, V extends AppConfigValue<T>> extends Function<JsonNode, V> {}
