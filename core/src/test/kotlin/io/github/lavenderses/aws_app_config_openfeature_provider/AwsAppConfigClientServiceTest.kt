@@ -23,22 +23,18 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.parser.DoubleAt
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.IntegerAttributeParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser
+import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
-import software.amazon.awssdk.core.SdkBytes
-import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationRequest
-import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse
 
 @ExtendWith(MockitoExtension::class)
 class AwsAppConfigClientServiceTest {
@@ -47,14 +43,7 @@ class AwsAppConfigClientServiceTest {
     private lateinit var awsAppConfigClientService: AwsAppConfigClientService
 
     @Mock
-    private lateinit var client: AppConfigDataClient
-
-    @Spy
-    private val options = AwsAppConfigClientOptions::class.fixture().run {
-        toBuilder()
-            .applicationName("token")
-            .build()
-    }
+    private lateinit var awsAppConfigProxy: AwsAppConfigProxy
 
     @Mock
     private lateinit var awsAppConfigParser: AwsAppConfigParser
@@ -85,16 +74,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = false
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigBooleanValue::class.fixture()
             val expected = PrimitiveEvaluationValue<Boolean>(
                 /* rawValue = */ true,
@@ -102,9 +83,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
@@ -144,16 +125,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = "defaultValue"
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigStringValue::class.fixture()
             val expected = PrimitiveEvaluationValue<String>(
                 /* rawValue = */ "test",
@@ -161,9 +134,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
@@ -199,9 +172,6 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = "defaultValue"
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
                 /* errorMessage = */ null,
@@ -209,9 +179,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doThrow(RuntimeException("error"))
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -231,25 +201,16 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = "defaultValue"
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "".toByteArray()
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ null,
                 /* reason = */ Reason.ERROR,
             )
 
-            doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+            doReturn(null)
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -269,16 +230,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = "defaultValue"
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
@@ -286,9 +239,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doThrow(
                 AppConfigValueParseException(
@@ -325,16 +278,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigIntegerValue::class.fixture()
             val expected = PrimitiveEvaluationValue<Int>(
                 /* rawValue = */ 12345,
@@ -342,9 +287,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
@@ -380,9 +325,6 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
                 /* errorMessage = */ null,
@@ -390,9 +332,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doThrow(RuntimeException("error"))
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -416,25 +358,16 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "".toByteArray()
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ null,
                 /* reason = */ Reason.ERROR,
             )
 
-            doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+            doReturn(null)
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -458,16 +391,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
@@ -475,9 +400,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doThrow(
                 AppConfigValueParseException(
@@ -514,16 +439,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345.0
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigDoubleValue::class.fixture()
             val expected = PrimitiveEvaluationValue<Double>(
                 /* rawValue = */ 12345.0,
@@ -531,9 +448,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
@@ -579,9 +496,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doThrow(RuntimeException("error"))
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -605,25 +522,16 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345.0
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "".toByteArray()
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ null,
                 /* reason = */ Reason.ERROR,
             )
 
-            doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+            doReturn(null)
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -647,16 +555,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = 12345.0
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
@@ -664,9 +564,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doThrow(
                 AppConfigValueParseException(
@@ -703,16 +603,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = Value(true)
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigObjectValue::class.fixture()
             val expected = ObjectEvaluationValue<Boolean>(
                 /* rawValue = */ true,
@@ -720,9 +612,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doReturn(flagValue)
                 .whenever(awsAppConfigParser)
@@ -758,9 +650,6 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = Value(true)
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
                 /* errorMessage = */ null,
@@ -768,9 +657,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doThrow(RuntimeException("error"))
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -790,25 +679,16 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = Value(true)
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn "".toByteArray()
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ null,
                 /* reason = */ Reason.ERROR,
             )
 
-            doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+            doReturn(null)
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
 
             // do
@@ -828,16 +708,8 @@ class AwsAppConfigClientServiceTest {
             // prepare
             val key = "key"
             val defaultValue = Value(true)
-            val request = GetLatestConfigurationRequest.builder()
-                .configurationToken("token")
-                .build()
-            val configuration = mock<SdkBytes> {
-                on { asByteArray() } doReturn """{ "foo": "bar" }""".toByteArray()
-                on { asUtf8String() } doReturn """{ "foo": "bar" }"""
-            }
-            val response = mock<GetLatestConfigurationResponse> {
-                on { configuration() } doReturn configuration
-            }
+            // language=json
+            val response = """{ "foo": "bar" }"""
             val expected = ErrorEvaluationValue<Value>(
                 /* errorCode = */ ErrorCode.PARSE_ERROR,
                 /* errorMessage = */ """errorMessage. Response from AWS AppConfig: { "foo": "bar" }""",
@@ -845,9 +717,9 @@ class AwsAppConfigClientServiceTest {
             )
 
             doReturn(response)
-                .whenever(client)
-                .getLatestConfiguration(
-                    /* getLatestConfigurationRequest = */ request,
+                .whenever(awsAppConfigProxy)
+                .getRawFlagObject(
+                    /* key = */ key,
                 )
             doThrow(
                 AppConfigValueParseException(
