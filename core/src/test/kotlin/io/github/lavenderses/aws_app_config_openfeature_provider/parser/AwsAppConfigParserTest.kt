@@ -72,6 +72,7 @@ class AwsAppConfigParserTest {
             ).isEqualTo(expected)
         }
 
+        @Suppress("ForbiddenComment")
         // TODO: Do test
         @Disabled
         @Test
