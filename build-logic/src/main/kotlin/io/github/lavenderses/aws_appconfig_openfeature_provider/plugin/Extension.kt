@@ -37,6 +37,14 @@ fun DependencyHandler.api(dependencyNotation: Any) {
     add("api", dependencyNotation)
 }
 
+fun DependencyHandler.compileOnly(dependencyNotation: Any) {
+    add("compileOnly", dependencyNotation)
+}
+
+fun DependencyHandler.runtimeOnly(dependencyNotation: Any) {
+    add("runtimeOnly", dependencyNotation)
+}
+
 fun DependencyHandler.testImplementation(dependencyNotation: Any) {
     add("testImplementation", dependencyNotation)
 }

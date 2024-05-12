@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile name="ACCESS" fileName="access.log"
+                     filePattern="access.%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%m%n</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <!-- daily rollover -->
+                <TimeBasedTriggeringPolicy/>
+                <!-- each file should be at most 1GB -->
+                <SizeBasedTriggeringPolicy size="1GB"/>
+            </Policies>
+            <!-- keep 30 archives -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.linecorp.armeria.logging.access" level="INFO" additivity="false">
+            <AppenderRef ref="ACCESS"/>
+        </Logger>
+        <Root level="DEBUG">
+            <AppenderRef ref="CONSOLE"/>
+        </Root>
+    </Loggers>
+</Configuration>

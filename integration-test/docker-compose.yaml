@@ -1,0 +1,38 @@
+services:
+  app:
+    # built by ./gradlew :integration-test:app:jibDockerBuild
+    image: awsappconfig-openfeature-provider-java:integration-test
+    ports:
+      - 8080:8080
+    depends_on:
+      app-config-agent:
+        condition: service_healthy
+    environment:
+      APP_CONFIG_ENDPOINT: http://app-config-agent:2772
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - http://localhost:8080/internal/l7check/
+      interval: "3s"
+      timeout: "30s"
+      retries: 30
+      start_period: "10s"
+  app-config-agent:
+    image: public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.0.3216
+    ports:
+      - 2772:2772
+    environment:
+      LOCAL_DEVELOPMENT_DIRECTORY: /home/www/app-config-value
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./testing/src/test/resources/docker:/home/www/app-config-value
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - http://localhost:2772/applications/app/environments/env/configurations/profile
+      interval: "3s"
+      timeout: "30s"
+      retries: 30
+      start_period: "10s"

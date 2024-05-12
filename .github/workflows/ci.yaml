@@ -38,7 +38,7 @@ jobs:
           distribution: "temurin"
 
       - name: test
-        run: ./gradlew clean test --stacktrace
+        run: ./gradlew clean test -x integration-test:testing:test --stacktrace
 
       - name: test report
         uses: mikepenz/action-junit-report@v4
@@ -60,4 +60,4 @@ jobs:
           distribution: "temurin"
 
       - name: build
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x integration-test:testing:test
