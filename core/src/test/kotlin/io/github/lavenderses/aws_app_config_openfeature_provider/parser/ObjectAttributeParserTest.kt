@@ -206,17 +206,18 @@ class ObjectAttributeParserTest {
                                     "bar" to Value(
                                         ImmutableStructure(
                                             mutableMapOf(
-                                                "qux" to Value(123245),
+                                                "qux" to Value(12345),
                                             ),
                                         ),
                                     ),
+                                    "quux" to Value(true)
                                 ),
                             ),
                         ),
                         "corge" to Value("98765"),
                         "grault" to Value(Time.fixedInstant),
                     ),
-                ),
+                )
             )
 
             // do & verify
@@ -225,8 +226,10 @@ class ObjectAttributeParserTest {
                     valueNode,
                     hashMap,
                     hashMap::put,
-                ),
-            ).isEqualTo(expected)
+                )
+                    .asStructure()
+                    .asObjectMap(),
+            ).isEqualTo(expected.asStructure().asObjectMap())
         }
     }
 }
