@@ -1,8 +1,12 @@
+import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectGroupId
+import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectVersion
+
 plugins {
     `maven-publish`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.aws.appconfig.openfeature.provider.java)
     alias(libs.plugins.aws.appconfig.openfeature.provider.lint.kotlin)
+    alias(libs.plugins.aws.appconfig.openfeature.provider.publication)
 }
 
 description = "OpenFeature Provider third-party implementation for AWS AppConfig in Java"
@@ -20,26 +24,11 @@ dependencies {
     testFixturesImplementation(libs.jackson.databind)
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "io.github.lavenderses"
-            artifactId = "aws-appconfig-openfeature-provider-java"
-            version = "0.1.0"
+mavenPublishing {
+    coordinates(projectGroupId, "aws-appconfig-openfeature-provider-java", projectVersion)
 
-            from(components["java"])
-
-            pom {
-                name.set("aws-appconfig-openfeature-provider-java")
-                description.set("OpenFeature Provider third-party implementation for AWS AppConfig in Java")
-                url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-            }
-        }
+    pom {
+        name.set("OpenFeature Provider implementation for AWS AppConfig in Java")
+        description.set("OpenFeature Provider third-party implementation for AWS AppConfig in Java")
     }
 }
