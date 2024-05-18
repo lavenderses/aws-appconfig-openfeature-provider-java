@@ -16,6 +16,9 @@ See AWS AppConfig documentation for what is AWS AppConfig.
 
 First of all, install this library from Maven central repository.
 
+The latest version is in here:
+https://central.sonatype.com/artifact/io.github.lavenderses/aws-appconfig-openfeature-provider-java/overview
+
 ```gradle
 dependencies {
     implementation 'io.github.lavenderses:aws-appconfig-openfeature-provider-java:0.3.0'
