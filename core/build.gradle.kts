@@ -1,4 +1,5 @@
-import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.publicationName
+import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectGroupId
+import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectVersion
 
 plugins {
     `maven-publish`
@@ -23,12 +24,11 @@ dependencies {
     testFixturesImplementation(libs.jackson.databind)
 }
 
-publishing {
-    publications {
-        named<MavenPublication>(publicationName) {
-            pom {
-                description.set("OpenFeature Provider third-party implementation for AWS AppConfig in Java")
-            }
-        }
+mavenPublishing {
+    coordinates(projectGroupId, "aws-appconfig-openfeature-provider-java", projectVersion)
+
+    pom {
+        name.set("OpenFeature Provider implementation for AWS AppConfig in Java")
+        description.set("OpenFeature Provider third-party implementation for AWS AppConfig in Java")
     }
 }

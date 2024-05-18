@@ -1,16 +1,13 @@
 package io.github.lavenderses.aws_appconfig_openfeature_provider.plugin
 
-import cl.franciscosolis.sonatypecentralupload.SonatypeCentralUploadPlugin
-import cl.franciscosolis.sonatypecentralupload.SonatypeCentralUploadTask
+import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.gradle.kotlin.dsl.get
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 
 class PublicationPlugin: Plugin<Project> {
@@ -19,67 +16,43 @@ class PublicationPlugin: Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply(MavenPublishPlugin::class.java)
-                apply(SonatypeCentralUploadPlugin::class.java)
+                apply(com.vanniktech.maven.publish.MavenPublishPlugin::class.java)
             }
 
-            with(extensions.getByType<JavaPluginExtension>()) {
-                withSourcesJar()
-                withJavadocJar()
-            }
+            with(extensions.getByType<MavenPublishBaseExtension>()) {
+                coordinates(projectGroupId, "aws-appconfig-openfeature-provider-java", projectVersion)
 
-            with(extensions.getByType<PublishingExtension>()) {
-                publications {
-                    register<MavenPublication>(publicationName) {
-                        groupId = "io.github.lavenderses"
+                publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+                signAllPublications()
 
-                        from(components["java"])
+                pom {
+                    inceptionYear.set("2024")
+                    url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java")
 
-                        pom {
-                            url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java")
-
-                            licenses {
-                                license {
-                                    name.set("The Apache License, Version 2.0")
-                                    url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java/blob/main/LICENSE")
-                                }
-                            }
-
-                            developers {
-                                developer {
-                                    id.set("lavenderses")
-                                    name.set("cat")
-                                    email.set(System.getenv("EMAIL"))
-                                }
-                            }
-
-                            scm {
-                                url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java")
-                            }
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java/blob/main/LICENSE")
                         }
+                    }
+
+                    developers {
+                        developer {
+                            id.set("lavenderses")
+                            name.set("cat")
+                            email.set(System.getenv("EMAIL"))
+                        }
+                    }
+
+                    scm {
+                        url.set("https://github.com/lavenderses/AWSAppConfig-OpenFeature-provider-java")
                     }
                 }
             }
 
-            tasks.withType<SonatypeCentralUploadTask> {
-                dependsOn("jar", "sourcesJar", "javadocJar", "generatePomFileForMavenPublication")
-
-                username.set(System.getenv("SONATYPE_USERNAME"))
-                password.set(System.getenv("SONATYPE_PASSWORD"))
-
-                archives.set(
-                    files(
-                        tasks.named("jar"),
-                        tasks.named("sourcesJar"),
-                        tasks.named("javadocJar"),
-                    )
-                )
-
-                pom.set(
-                    file(tasks.named("generatePomFileForMavenPublication").get().outputs.files.single())
-                )
-
-                signingKey.set(System.getenv("PGP_SIGNING_KEY"))
-                signingKeyPassphrase.set(System.getenv("PGP_SIGNING_KEY_PASSPHRASE"))
+            tasks.withType<GenerateModuleMetadata> {
+                // TODO: Remove kotlinSourcesJar
+                dependsOn("kotlinSourcesJar", "plainJavadocJar")
             }
         }
     }

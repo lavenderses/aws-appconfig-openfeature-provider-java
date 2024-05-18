@@ -10,4 +10,4 @@ build
 
 access.log
 
-.env
+.ignore.gradle.properties

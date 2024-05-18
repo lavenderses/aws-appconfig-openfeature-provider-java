@@ -22,8 +22,8 @@ class BasePlugin : Plugin<Project> {
                 apply(libs.findPlugin("kotlin-jvm").get().get().pluginId)
             }
 
-            group = "io.github.lavenderses"
-            version = "0.0.0"
+            group = projectGroupId
+            version = projectVersion
 
             with(repositories) {
                 mavenCentral()

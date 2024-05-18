@@ -39,5 +39,5 @@ dependencies {
     implementation(libs.ktlint.gradle.plugin)
     implementation(libs.lombok.gradle.plugin)
     implementation(libs.spotbugs.gradle.plugin)
-    implementation(libs.sonatype.central.upload)
+    implementation(libs.gradle.maven.publish.plugin)
 }
