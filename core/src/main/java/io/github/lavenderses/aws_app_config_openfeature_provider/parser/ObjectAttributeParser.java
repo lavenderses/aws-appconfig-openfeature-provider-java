@@ -1,11 +1,15 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.openfeature.sdk.ImmutableStructure;
 import dev.openfeature.sdk.Structure;
 import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
+import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -16,12 +20,26 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Parser implementation for Object-type (might be structure type in OpenFeature, or else primitive {@link Value} in
  * SDK) feature flag value.
  */
 public final class ObjectAttributeParser  extends AbstractAttributeParser<Value, AppConfigObjectValue> {
+
+    private final ObjectMapper objectMapper;
+
+    @VisibleForTesting
+    ObjectAttributeParser(
+        @NotNull final ObjectMapper objectMapper
+    ) {
+        this.objectMapper = requireNonNull(objectMapper, "objectMapper");
+    }
+
+    public ObjectAttributeParser() {
+        objectMapper = ObjectMapperBuilder.build();
+    }
 
     /**
      * Extract "Attribute" as Object in JSON response from AWS AppConfig.
@@ -34,10 +52,27 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
     public AppConfigObjectValue apply(
         @NotNull JsonNode keyNode
     ) {
-        final JsonNode flagValueNode = getValidFlagValueNode(
+        // AWS AppConfig returns JSON format string, so this JsonNode is String Type node.
+        final JsonNode flagRawValueNode = getValidFlagValueNode(
             /* keyNode = */ keyNode,
             /* expectedNodeType = */ null
         );
+        if (!flagRawValueNode.isTextual()) {
+            throw new AppConfigValueParseException(
+                /* response = */ flagRawValueNode.toString(),
+                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
+            );
+        }
+        final String flagValueJsonString = flagRawValueNode.asText();
+        final JsonNode flagValueNode;
+        try {
+            flagValueNode = objectMapper.readTree(flagValueJsonString);
+        } catch (final JsonProcessingException e) {
+            throw new AppConfigValueParseException(
+                /* response = */ flagValueJsonString,
+                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
+            );
+        }
 
         // add JSON node's value recursively
         final HashMap<String, Value> hashMap = new HashMap<>();

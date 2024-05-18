@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
@@ -28,6 +29,9 @@ class ObjectAttributeParserTest {
     @InjectMocks
     private lateinit var objectAttributeParser: ObjectAttributeParser
 
+    @Spy
+    private val objectMapper = ObjectMapperBuilder.build()
+
     @Nested
     inner class AttributeAsObject {
 
@@ -39,14 +43,33 @@ class ObjectAttributeParserTest {
                 """
                   {
                     "enabled": true,
-                    "flag_value": 12345
+                    "flag_value": "{\"foo\":{\"bar\":\"buz\"},\"qux\":[\"quux\",\"corge\"]}"
                   }
                 """.trimIndent(),
             )
             val expected = AppConfigObjectValue(
                 /* enabled = */ true,
-                /* value = */ Value(12345),
-                /* jsonFormat = */ """{"enable":true,"flag_value":12345}""",
+                /* value = */ Value(
+                    ImmutableStructure(
+                        mapOf(
+                            "foo" to Value(
+                                ImmutableStructure(
+                                    mapOf(
+                                        "bar" to Value("buz"),
+                                    ),
+                                ),
+                            ),
+                            "qux" to Value(
+                                listOf(
+                                    Value("quux"),
+                                    Value("corge"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                @Suppress("MaxLineLength")
+                /* jsonFormat = */ """{"enable":true,"flag_value":"{\"foo\":{\"bar\":\"buz\"},\"qux\":[\"quux\",\"corge\"]}"}""",
             )
 
             // do & verify
@@ -65,14 +88,33 @@ class ObjectAttributeParserTest {
                 """
                   {
                     "enabled": false,
-                    "flag_value": 12345
+                    "flag_value": "{\"foo\":{\"bar\":\"buz\"},\"qux\":[\"quux\",\"corge\"]}"
                   }
                 """.trimIndent(),
             )
             val expected = AppConfigObjectValue(
                 /* enabled = */ false,
-                /* value = */ Value(12345),
-                /* jsonFormat = */ """{"enable":false,"flag_value":12345}""",
+                /* value = */ Value(
+                    ImmutableStructure(
+                        mapOf(
+                            "foo" to Value(
+                                ImmutableStructure(
+                                    mapOf(
+                                        "bar" to Value("buz"),
+                                    ),
+                                ),
+                            ),
+                            "qux" to Value(
+                                listOf(
+                                    Value("quux"),
+                                    Value("corge"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                @Suppress("MaxLineLength")
+                /* jsonFormat = */ """{"enable":true,"flag_value":"{\"foo\":{\"bar\":\"buz\"},\"qux\":[\"quux\",\"corge\"]}"}""",
             )
 
             // do & verify
@@ -206,10 +248,11 @@ class ObjectAttributeParserTest {
                                     "bar" to Value(
                                         ImmutableStructure(
                                             mutableMapOf(
-                                                "qux" to Value(123245),
+                                                "qux" to Value(12345),
                                             ),
                                         ),
                                     ),
+                                    "quux" to Value(true),
                                 ),
                             ),
                         ),
@@ -225,8 +268,10 @@ class ObjectAttributeParserTest {
                     valueNode,
                     hashMap,
                     hashMap::put,
-                ),
-            ).isEqualTo(expected)
+                )
+                    .asStructure()
+                    .asObjectMap(),
+            ).isEqualTo(expected.asStructure().asObjectMap())
         }
     }
 }

@@ -10,14 +10,14 @@ import static java.util.Objects.requireNonNull;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class ObjectEvaluationValue<T> extends SuccessEvaluationValue<Value> {
+public final class ObjectEvaluationValue extends SuccessEvaluationValue<Value> {
 
     public ObjectEvaluationValue(
-        @NotNull T rawValue,
+        @NotNull Value rawValue,
         @NotNull Reason reason
     ) {
         super(
-            /* wrappedValue = */ Value.objectToValue(requireNonNull(rawValue, "rawValue")),
+            /* wrappedValue = */ requireNonNull(rawValue, "rawValue"),
             /* reason = */ requireNonNull(reason, "Reason")
         );
     }

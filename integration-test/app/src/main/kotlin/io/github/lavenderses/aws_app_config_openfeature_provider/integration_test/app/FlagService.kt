@@ -1,5 +1,9 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.integration_test.app
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.BooleanNode
+import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.linecorp.armeria.server.annotation.ConsumesJson
 import com.linecorp.armeria.server.annotation.Get
 import com.linecorp.armeria.server.annotation.Param
@@ -8,12 +12,14 @@ import com.linecorp.armeria.server.annotation.ProducesJson
 import com.linecorp.armeria.server.annotation.RequestConverter
 import dev.openfeature.sdk.Client
 import dev.openfeature.sdk.OpenFeatureAPI
+import dev.openfeature.sdk.Structure
 import dev.openfeature.sdk.Value
 import io.github.lavenderses.aws_app_config_openfeature_provider.AwsAppConfigClientOptions
 import io.github.lavenderses.aws_app_config_openfeature_provider.AwsAppConfigFeatureProvider
 import io.github.lavenderses.aws_app_config_openfeature_provider.integration_test.model.FlagValueResponse
 import io.github.lavenderses.aws_app_config_openfeature_provider.integration_test.model.ProxyType
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config.AwsAppConfigAgentProxyConfig
+import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder
 import java.net.URI
 
 @ProducesJson
@@ -23,6 +29,12 @@ class FlagService {
         private const val APPLICATION_NAME = "app"
         private const val ENVIRONMENT_NAME = "env"
         private const val PROFILE_NAME = "profile"
+
+        /**
+         * This is just for serializing [Structure]. This is hard to serialize with Jackson.
+         * https://github.com/open-feature/java-sdk/issues/483
+         */
+        private val OBJECT_MAPPER = ObjectMapperBuilder.build()
     }
 
     /**
@@ -130,17 +142,19 @@ class FlagService {
     fun getFlag(
         @Param("key") key: String,
         @Param("agent") agent: ProxyType,
-        defaultValue: String,
-    ): FlagValueResponse<Any> {
+        defaultValue: Any,
+    ): FlagValueResponse<JsonNode> {
         return getFlagInternal(
             key = key,
-            defaultValue = defaultValue,
+            defaultValue = OBJECT_MAPPER.readTree(defaultValue.toString()),
             agent = agent,
         ) {
             getObjectValue(
                 /* p0 = */ key,
                 /* p1 = */ Value.objectToValue(defaultValue),
             )
+                .asStructure()
+                .toMapRecursively()
         }
     }
 
@@ -161,5 +175,54 @@ class FlagService {
             defaultValue = defaultValue,
             value = value,
         )
+    }
+
+    /**
+     * This provider ensures returning Stricture with `key` -> [Value] mapping.
+     * See. [io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAttributeParser].
+     */
+    private fun Structure.toMapRecursively(): JsonNode {
+        val objectNode = OBJECT_MAPPER.createObjectNode()
+
+        fun parseRecursive(node: Value): JsonNode {
+            return when {
+                node.isStructure -> {
+                    val map = node.asStructure().asMap()
+                    val jsonNode = OBJECT_MAPPER.createObjectNode()
+
+                    map.forEach { (k, v) ->
+                        val childNode = parseRecursive(v)
+                        jsonNode.putIfAbsent(k, childNode)
+                    }
+
+                    jsonNode
+                }
+                node.isList -> {
+                    val map = node.asList()
+                    val jsonNode = OBJECT_MAPPER.createArrayNode()
+
+                    map.forEach {
+                        val childNode = parseRecursive(it)
+                        jsonNode.add(childNode)
+                    }
+
+                    jsonNode
+                }
+                node.isNull -> OBJECT_MAPPER.createObjectNode()
+                node.isBoolean -> BooleanNode.valueOf(node.asBoolean())
+                node.isString -> TextNode.valueOf(node.asString())
+                node.isNumber -> IntNode.valueOf(node.asInteger())
+                node.isInstant -> TextNode.valueOf(node.asInstant().toString())
+                else -> OBJECT_MAPPER.createObjectNode()
+            }
+        }
+
+        val root = asMap()
+        root.forEach { (k, v) ->
+            val childNode = parseRecursive(v)
+            objectNode.putIfAbsent(k, childNode)
+        }
+
+        return objectNode
     }
 }
