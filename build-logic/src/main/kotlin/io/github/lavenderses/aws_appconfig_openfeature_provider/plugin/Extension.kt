@@ -33,7 +33,7 @@ val Project.publicationName: String get() = "maven"
 
 val Project.projectGroupId: String get() = "io.github.lavenderses"
 
-val Project.projectVersion: String get() = "0.3.0"
+val Project.projectVersion: String get() = "0.4.0"
 
 fun DependencyHandler.implementation(dependencyNotation: Any) {
     add("implementation", dependencyNotation)
