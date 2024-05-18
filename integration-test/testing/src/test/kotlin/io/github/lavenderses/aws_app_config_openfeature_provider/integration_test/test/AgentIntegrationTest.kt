@@ -1,7 +1,6 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.integration_test.test
 
 import io.github.lavenderses.aws_app_config_openfeature_provider.integration_test.model.ProxyType
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 
@@ -133,7 +132,6 @@ class AgentIntegrationTest {
         )
     }
 
-    @Disabled("TODO")
     @Test
     fun objectValue() {
         // prepare
@@ -145,7 +143,7 @@ class AgentIntegrationTest {
           {
             "key": "objectValue",
             "defaultValue": {},
-            "flag_value": {
+            "value": {
               "nested": {
                 "this is": "value"
               },
