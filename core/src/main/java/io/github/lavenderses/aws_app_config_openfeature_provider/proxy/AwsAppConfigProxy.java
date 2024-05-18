@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Common interface between AWS AppConfig instance <-> Provider implementation.
+ * Common interface between AWS AppConfig instance &lt;-&gt; Provider implementation.
  * <br/>
  * <b>The reason this interface is required</b>
  * <br/>

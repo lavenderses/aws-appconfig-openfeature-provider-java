@@ -9,3 +9,5 @@ build
 /.idea/modules
 
 access.log
+
+.env

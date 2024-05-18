@@ -5,17 +5,13 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JavaTestFixturesPlugin
-import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 class BasePlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         with(target) {
-            group = "io.github.lavenderses"
-
             with(pluginManager) {
                 // first party plugin
                 apply(TestPlugin::class.java)
@@ -25,6 +21,9 @@ class BasePlugin : Plugin<Project> {
                 apply(JavaTestFixturesPlugin::class.java)
                 apply(libs.findPlugin("kotlin-jvm").get().get().pluginId)
             }
+
+            group = "io.github.lavenderses"
+            version = "0.0.0"
 
             with(repositories) {
                 mavenCentral()
@@ -49,12 +48,6 @@ class BasePlugin : Plugin<Project> {
 
                 // bom
                 implementation(platform(libs.findLibrary("aws-bom").get()))
-            }
-
-            tasks.withType<Jar> {
-                println("aws-app-config-openfeature-provider-java-${project.name}")
-                group = "io.github.lavenderses"
-                archiveBaseName.set("aws-app-config-openfeature-provider-java-${project.name}")
             }
         }
     }

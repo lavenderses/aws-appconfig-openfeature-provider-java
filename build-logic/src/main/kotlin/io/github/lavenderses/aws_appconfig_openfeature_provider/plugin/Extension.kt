@@ -29,6 +29,8 @@ val Project.PROJECT_JDK: JdkVersion
 
 val Project.libs: VersionCatalog get() = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
+val Project.publicationName: String get() = "maven"
+
 fun DependencyHandler.implementation(dependencyNotation: Any) {
     add("implementation", dependencyNotation)
 }

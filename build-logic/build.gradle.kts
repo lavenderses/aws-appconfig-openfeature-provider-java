@@ -22,6 +22,10 @@ gradlePlugin {
             id = libs.plugins.aws.appconfig.openfeature.provider.lint.kotlin.get().pluginId
             implementationClass = "io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.KotlinLintPlugin"
         }
+        register(libs.plugins.aws.appconfig.openfeature.provider.publication.get().pluginId) {
+            id = libs.plugins.aws.appconfig.openfeature.provider.publication.get().pluginId
+            implementationClass = "io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.PublicationPlugin"
+        }
         register(libs.plugins.aws.appconfig.openfeature.provider.test.get().pluginId) {
             id = libs.plugins.aws.appconfig.openfeature.provider.test.get().pluginId
             implementationClass = "io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.TestPlugin"
@@ -35,4 +39,5 @@ dependencies {
     implementation(libs.ktlint.gradle.plugin)
     implementation(libs.lombok.gradle.plugin)
     implementation(libs.spotbugs.gradle.plugin)
+    implementation(libs.sonatype.central.upload)
 }
