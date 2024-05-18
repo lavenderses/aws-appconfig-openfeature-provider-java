@@ -3,7 +3,6 @@ package io.github.lavenderses.aws_app_config_openfeature_provider.integration_te
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.linecorp.armeria.server.annotation.ConsumesJson
 import com.linecorp.armeria.server.annotation.Get
