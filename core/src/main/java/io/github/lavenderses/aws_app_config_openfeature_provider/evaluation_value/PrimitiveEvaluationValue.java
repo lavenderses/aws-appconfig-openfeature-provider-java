@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PrimitiveEvaluationValue<T> extends SuccessEvaluationValue<T> {
+public final class PrimitiveEvaluationValue<T> extends SuccessEvaluationValue<T> {
 
     public PrimitiveEvaluationValue(
         @NotNull final T rawValue,

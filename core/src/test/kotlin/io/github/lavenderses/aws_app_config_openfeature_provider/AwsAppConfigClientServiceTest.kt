@@ -3,6 +3,7 @@ package io.github.lavenderses.aws_app_config_openfeature_provider
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import dev.openfeature.sdk.ErrorCode
+import dev.openfeature.sdk.ImmutableStructure
 import dev.openfeature.sdk.Reason
 import dev.openfeature.sdk.Value
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigBooleanValue
@@ -100,10 +101,9 @@ class AwsAppConfigClientServiceTest {
                 ),
             )
                 .whenever(appConfigValueConfigValueConverter)
-                .toEvaluationValue(
+                .toPrimitiveEvaluationValue(
                     /* defaultValue = */ defaultValue,
                     /* appConfigValue = */ flagValue,
-                    /* asPrimitive = */ true,
                 )
 
             // do & verify
@@ -151,10 +151,9 @@ class AwsAppConfigClientServiceTest {
                 ),
             )
                 .whenever(appConfigValueConfigValueConverter)
-                .toEvaluationValue(
+                .toPrimitiveEvaluationValue(
                     /* defaultValue = */ defaultValue,
                     /* appConfigValue = */ flagValue,
-                    /* asPrimitive = */ true,
                 )
 
             // do & verify
@@ -304,10 +303,9 @@ class AwsAppConfigClientServiceTest {
                 ),
             )
                 .whenever(appConfigValueConfigValueConverter)
-                .toEvaluationValue(
+                .toPrimitiveEvaluationValue(
                     /* defaultValue = */ defaultValue,
                     /* appConfigValue = */ flagValue,
-                    /* asPrimitive = */ true,
                 )
 
             // do & verify
@@ -465,10 +463,9 @@ class AwsAppConfigClientServiceTest {
                 ),
             )
                 .whenever(appConfigValueConfigValueConverter)
-                .toEvaluationValue(
+                .toPrimitiveEvaluationValue(
                     /* defaultValue = */ defaultValue,
                     /* appConfigValue = */ flagValue,
-                    /* asPrimitive = */ true,
                 )
 
             // do & verify
@@ -602,8 +599,14 @@ class AwsAppConfigClientServiceTest {
             // language=json
             val response = """{ "foo": "bar" }"""
             val flagValue = AppConfigObjectValue::class.fixture()
-            val expected = ObjectEvaluationValue<Boolean>(
-                /* rawValue = */ true,
+            val expected = ObjectEvaluationValue(
+                /* rawValue = */ Value(
+                    ImmutableStructure(
+                        mapOf(
+                            "foo" to Value("bar"),
+                        ),
+                    ),
+                ),
                 /* reason = */ Reason.TARGETING_MATCH,
             )
 
@@ -620,16 +623,21 @@ class AwsAppConfigClientServiceTest {
                     /* buildAppConfigValue = */ objectAttributeParser,
                 )
             doReturn(
-                ObjectEvaluationValue<Boolean>(
-                    /* rawValue = */ true,
+                ObjectEvaluationValue(
+                    /* rawValue = */ Value(
+                        ImmutableStructure(
+                            mapOf(
+                                "foo" to Value("bar"),
+                            ),
+                        ),
+                    ),
                     /* reason = */ Reason.TARGETING_MATCH,
                 ),
             )
                 .whenever(appConfigValueConfigValueConverter)
-                .toEvaluationValue(
+                .toObjectEvaluationValue(
                     /* defaultValue = */ defaultValue,
-                    /* appConfigValue = */ flagValue,
-                    /* asPrimitive = */ false,
+                    /* appConfigObjectValue = */ flagValue,
                 )
 
             // do & verify
@@ -637,8 +645,12 @@ class AwsAppConfigClientServiceTest {
                 awsAppConfigClientService.getValue(
                     /* key = */ key,
                     /* defaultValue = */ defaultValue,
-                ),
-            ).isEqualTo(expected)
+                )
+                    .providerEvaluation()
+                    .value
+                    .asStructure()
+                    .asMap(),
+            ).isEqualTo(expected.providerEvaluation().value.asStructure().asMap())
         }
 
         @Test

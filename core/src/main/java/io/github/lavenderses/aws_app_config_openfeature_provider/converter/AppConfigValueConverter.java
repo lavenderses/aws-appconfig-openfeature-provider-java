@@ -1,6 +1,8 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.converter;
 
 import dev.openfeature.sdk.FlagEvaluationDetails;
+import dev.openfeature.sdk.Value;
+import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
@@ -20,35 +22,53 @@ public final class AppConfigValueConverter {
 
     /**
      * Converts {@param  appConfigValue} to appropriate typed {@link EvaluationValue}.
-     * Once {@link AppConfigValue} is instantiated, and thus (see javadoc), returned {@link EvaluationValue} will be
+     * Once {@link AppConfigValue} is instantiated, and thus (see javadoc), returned {@link EvaluationValue} is
      * implementation of {@link SuccessEvaluationValue}.
      *
      * @param defaultValue a default value Application Author specifies
-     * @param asPrimitive is the target feature flag type in OpenFeature (={@param T} is primitive
-     *                    (boolean / number / string)
-     * @param <T> target feature flag type (boolean / number / string / object)
+     * @param <T> target feature flag type (boolean / number / string)
      */
-    public <T> EvaluationValue<T> toEvaluationValue(
+    public <T> EvaluationValue<T> toPrimitiveEvaluationValue(
         @NotNull final T defaultValue,
-        @NotNull final AppConfigValue<T> appConfigValue,
-        final boolean asPrimitive
+        @NotNull final AppConfigValue<T> appConfigValue
     ) {
-        if (asPrimitive) {
-            return primitiveEvaluationValue(
-                /* defaultValue = */ defaultValue,
-                /* appConfigValue = */ appConfigValue
-            );
-        } else {
-            // TODO object
-            return primitiveEvaluationValue(
-                /* defaultValue = */ defaultValue,
-                /* appConfigValue = */ appConfigValue
-            );
-        }
+        final ConversionResult<T> conversionResult = decideValue(
+            /* defaultValue = */ defaultValue,
+            /* appConfigValue = */ appConfigValue
+        );
+
+        return new PrimitiveEvaluationValue<>(
+            /* rawValue = */ conversionResult.getFeatureFlagValue(),
+            /* reason = */ conversionResult.getEvaluationResult().getReason()
+        );
+    }
+
+    /**
+     * Converts {@param  appConfigValue} to object typed EvaluationValue, {@link ObjectEvaluationValue}
+     * Once {@link AppConfigObjectValue} is instantiated, and thus (see javadoc), returned {@link ObjectEvaluationValue}
+     * is implementation of {@link SuccessEvaluationValue}.
+     *
+     * @param defaultValue a default value Application Author specifies
+     */
+    @NotNull
+    public ObjectEvaluationValue toObjectEvaluationValue(
+        @NotNull final Value defaultValue,
+        @NotNull final AppConfigObjectValue appConfigObjectValue
+    ) {
+        final ConversionResult<Value> conversionResult = decideValue(
+            /* defaultValue = */ defaultValue,
+            /* appConfigValue = */ appConfigObjectValue
+        );
+
+        return new ObjectEvaluationValue(
+            /* rawValue = */ conversionResult.getFeatureFlagValue(),
+            /* reason = */ conversionResult.getEvaluationResult().getReason()
+        );
     }
 
     @VisibleForTesting
-    <T> PrimitiveEvaluationValue<T> primitiveEvaluationValue(
+    @NotNull
+    <T> ConversionResult<T> decideValue(
         @NotNull final T defaultValue,
         @NotNull final AppConfigValue<T> appConfigValue
     ) {
@@ -65,20 +85,9 @@ public final class AppConfigValueConverter {
             evaluationResult = EvaluationResult.FLAG_DISABLED;
         }
 
-        return new PrimitiveEvaluationValue<>(
-            /* rawValue = */ featureFlagValue,
-            /* reason = */ evaluationResult.getReason()
-        );
-    }
-
-    @VisibleForTesting
-    <T> ObjectEvaluationValue<T> objectEvaluationValue(
-        @NotNull final AppConfigValue<T> appConfigValue
-    ) {
-        final T value = requireNonNull(appConfigValue.getValue(), "This is bug. Value must be non-null.");
-        return new ObjectEvaluationValue<>(
-            /* rawValue = */ value,
-            /* reason = */ EvaluationResult.SUCCESS.getReason()
-        );
+        return ConversionResult.<T>builder()
+            .featureFlagValue(featureFlagValue)
+            .evaluationResult(evaluationResult)
+            .build();
     }
 }
