@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "assignees": [
+    "@lavenderses",
+  ],
+  "reviewers": [
+    "@lavenderses"
+  ],
+  "labels": [
+    "renovate",
+  ],
+  // @lavenderses is in Tokyo
+  "timezone": "Asia/Tokyo",
+}
