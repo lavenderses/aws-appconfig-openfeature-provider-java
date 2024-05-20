@@ -21,7 +21,7 @@ https://central.sonatype.com/artifact/io.github.lavenderses/aws-appconfig-openfe
 
 ```gradle
 dependencies {
-    implementation 'io.github.lavenderses:aws-appconfig-openfeature-provider-java:0.3.0'
+    implementation 'io.github.lavenderses:aws-appconfig-openfeature-provider-java:0.4.0'
 
     // Also OpenFeature SDK for Java is required
     implementation 'dev.openfeature:sdk:1.8.0'
