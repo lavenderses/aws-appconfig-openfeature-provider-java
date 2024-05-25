@@ -22,7 +22,7 @@ class PublicationPlugin: Plugin<Project> {
             with(extensions.getByType<MavenPublishBaseExtension>()) {
                 coordinates(projectGroupId, "aws-appconfig-openfeature-provider-java", projectVersion)
 
-                publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+                publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
                 signAllPublications()
 
                 pom {

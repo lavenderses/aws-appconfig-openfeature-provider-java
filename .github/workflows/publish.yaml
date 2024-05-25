@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -20,11 +21,11 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: set up Gradle properties
-        shell: bash
-        env:
-          PUBLICATION_PROPERTIES: ${{ secrets.PUBLICATION_PROPERTIES }}
-        run: echo "$PUBLICATION_PROPERTIES" >> gradle.properties
-
       - name: publish
+        env:
+          EMAIL: ${{ secrets.EMAIL }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.PGP_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.PGP_SIGNING_KEY_PASSPHRASE }}
         run: ./gradlew :core:clean :core:publishAndReleaseToMavenCentral --no-configuration-cache
