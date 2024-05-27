@@ -19,7 +19,7 @@ services:
       retries: 30
       start_period: "10s"
   app-config-agent:
-    image: public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.0.3216
+    image: public.ecr.aws/aws-appconfig/aws-appconfig-agent:2.0.3296
     ports:
       - 2772:2772
     environment:
