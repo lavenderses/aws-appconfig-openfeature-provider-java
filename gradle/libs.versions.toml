@@ -54,7 +54,7 @@ detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plu
 lombok-gradle-plugin  = { module = "io.freefair.gradle:lombok-plugin", version = "8.6" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-gradle" }
-spotbugs-gradle-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.0.14" }
+spotbugs-gradle-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.0.15" }
 gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.28.0" }
 
 # testing
