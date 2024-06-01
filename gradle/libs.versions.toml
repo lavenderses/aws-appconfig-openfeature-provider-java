@@ -1,6 +1,6 @@
 [versions]
 armeria = "1.28.4"
-aws-sdk = "2.25.59"
+aws-sdk = "2.25.64"
 detekt = "1.23.6"
 jackson = "2.17.1"
 kotlin = "1.9.24"
