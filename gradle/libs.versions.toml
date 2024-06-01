@@ -32,6 +32,7 @@ aws-bom = { module = "software.amazon.awssdk:bom", version.ref = "aws-sdk" }
 aws-appconfigdata = { module = "software.amazon.awssdk:appconfigdata" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "24.1.0" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version = "3.0.0" }
 log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version = "2.23.1" }
 openfeature = { module = "dev.openfeature:sdk", version.ref = "openfeature" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.13" }

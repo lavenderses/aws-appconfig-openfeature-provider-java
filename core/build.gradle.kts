@@ -15,6 +15,7 @@ dependencies {
     compileOnly(libs.openfeature)
     implementation(libs.aws.appconfigdata)
     implementation(libs.jackson.databind)
+    implementation(libs.jakarta.annotation.api)
 
     // spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
     // spotbugs("com.github.spotbugs:spotbugs:4.8.0")
