@@ -2,7 +2,6 @@ package io.github.lavenderses.aws_app_config_openfeature_provider.proxy
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config.AwsAppConfigProxyConfig
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
@@ -12,9 +11,11 @@ import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfiguratio
 
 class AbstractAwsAppConfigProxyTest {
 
-    private val abstractAwsAppConfigProxy = object : AbstractAwsAppConfigProxy(
-        /* awsAppConfigProxyConfig = */ object : AwsAppConfigProxyConfig {},
-    ) {
+    private val abstractAwsAppConfigProxy = object : AbstractAwsAppConfigProxy() {
+        override fun close() {
+            TODO("Not yet implemented")
+        }
+
         // mocks
         override fun getRawFlagObject(key: String): String? {
             TODO("Not yet implemented")

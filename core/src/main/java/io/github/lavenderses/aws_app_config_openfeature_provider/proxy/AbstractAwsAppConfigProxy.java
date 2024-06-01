@@ -1,9 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy;
 
-import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config.AwsAppConfigProxyConfig;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,10 +20,6 @@ import static java.util.Objects.isNull;
 public abstract class AbstractAwsAppConfigProxy implements AwsAppConfigProxy {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAwsAppConfigProxy.class);
-
-    @NotNull
-    @NonNull
-    protected final AwsAppConfigProxyConfig awsAppConfigProxyConfig;
 
     /**
      * @param key feature flag key in OpenFeature world

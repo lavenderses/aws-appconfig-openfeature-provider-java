@@ -19,8 +19,7 @@ import org.jetbrains.annotations.Nullable;
  * To hide this difference, this interface is introduced (to connect whatever kind of the AWS AppConfig instance from
  * Provider implementation).
  */
-@FunctionalInterface
-public interface AwsAppConfigProxy {
+public interface AwsAppConfigProxy extends AutoCloseable {
 
     /**
      * Get the feature flag value as JSON schema (see {@link AppConfigValue} for the schema).<br/>

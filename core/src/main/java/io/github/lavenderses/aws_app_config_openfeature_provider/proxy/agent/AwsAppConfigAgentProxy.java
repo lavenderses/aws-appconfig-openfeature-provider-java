@@ -51,9 +51,7 @@ public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
         @NotNull final HttpClient httpClient,
         @NotNull final HttpResponse.BodyHandler<String> handler
         ) {
-        super(
-            /* awsAppConfigProxyConfig = */ requireNonNull(awsAppConfigProxyConfig, "awsAppConfigProxyConfig")
-        );
+        super();
 
         this.options = requireNonNull(options, "aws");
         config = requireNonNull(awsAppConfigProxyConfig, "awsAppConfigProxyConfig");
@@ -65,14 +63,17 @@ public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
         @NotNull final AwsAppConfigClientOptions options,
         @NotNull final AwsAppConfigAgentProxyConfig awsAppConfigProxyConfig
     ) {
-        super(
-            /* awsAppConfigProxyConfig = */ requireNonNull(awsAppConfigProxyConfig, "awsAppConfigProxyConfig")
-        );
+        super();
 
         this.options = requireNonNull(options, "aws");
-        config = awsAppConfigProxyConfig;
+        config = requireNonNull(awsAppConfigProxyConfig, "awsAppConfigProxyConfig");
         httpClient = setupHttpClient();
         handler = HttpResponse.BodyHandlers.ofString();
+    }
+
+    @Override
+    public void close() {
+        // nothing to close
     }
 
     /**
