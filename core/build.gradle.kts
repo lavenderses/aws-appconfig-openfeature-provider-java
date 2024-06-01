@@ -2,10 +2,9 @@ import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectGr
 import io.github.lavenderses.aws_appconfig_openfeature_provider.plugin.projectVersion
 
 plugins {
+    java
     `maven-publish`
-    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.aws.appconfig.openfeature.provider.java)
-    alias(libs.plugins.aws.appconfig.openfeature.provider.lint.kotlin)
     alias(libs.plugins.aws.appconfig.openfeature.provider.publication)
 }
 
@@ -19,10 +18,6 @@ dependencies {
 
     // spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
     // spotbugs("com.github.spotbugs:spotbugs:4.8.0")
-
-    testImplementation(libs.openfeature)
-    testFixturesImplementation(libs.openfeature)
-    testFixturesImplementation(libs.jackson.databind)
 }
 
 mavenPublishing {

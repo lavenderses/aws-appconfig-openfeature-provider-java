@@ -19,6 +19,7 @@ dependencyResolutionManagement {
 }
 
 include(":core")
+include(":core-test")
 include(":integration-test")
 include(":integration-test:app")
 include(":integration-test:model")
