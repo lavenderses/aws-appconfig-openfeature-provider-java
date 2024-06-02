@@ -1,5 +1,6 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.task;
 
+import io.github.lavenderses.aws_app_config_openfeature_provider.exception.ScheduledTaskExecutorCloseException;
 import jakarta.annotation.PreDestroy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -63,23 +64,36 @@ public final class ScheduledTaskExecutor implements AutoCloseable {
     @PreDestroy
     @Override
     public void close() throws InterruptedException {
-        log.info("Start termination of cache update scheduled task for {} second", TERMINATION_WAIT_SECOND);
+        final String taskName = option.getTaskName();
+        log.info("Start termination of task[{}] for {} second", TERMINATION_WAIT_SECOND, taskName);
         executorService.shutdown();
 
-        final boolean terminated = executorService.awaitTermination(
+        boolean terminated = executorService.awaitTermination(
             /* timeout = */ TERMINATION_WAIT_SECOND,
             /* unit = */ TimeUnit.SECONDS
         );
 
         if (terminated) {
-            log.info("Terminated of cache update scheduled task");
+            log.info("Terminated of task[{}]", taskName);
         } else {
             log.error(
-                "Timed out {} second for termination of cache update scheduled task. Start force termination",
-                TERMINATION_WAIT_SECOND
+                "Timed out {} second for termination of task[{}]. Start force termination",
+                TERMINATION_WAIT_SECOND,
+                taskName
             );
 
             executorService.shutdownNow();
+
+            terminated = executorService.awaitTermination(
+                /* timeout = */ TERMINATION_WAIT_SECOND,
+                /* unit = */ TimeUnit.SECONDS
+            );
+
+            if (terminated) {
+                log.warn("Terminated of task[{}] with force shutdown", taskName);
+            } else {
+                throw new ScheduledTaskExecutorCloseException("Failed to terminate task[%s]".formatted(taskName));
+            }
         }
     }
 }

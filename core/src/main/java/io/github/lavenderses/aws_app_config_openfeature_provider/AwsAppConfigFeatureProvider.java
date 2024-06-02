@@ -12,6 +12,7 @@ import dev.openfeature.sdk.Value;
 import java.util.List;
 
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.exception.ProviderCloseException;
 import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Normative;
 import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Requirements;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,8 @@ import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
     by = "Implementing FeatureProvider for each type as final class."
 )
 public final class AwsAppConfigFeatureProvider implements FeatureProvider {
+
+    private static final String META_NAME = "AwsAppConfigFeatureProvider";
 
     @NotNull
     private final AwsAppConfigClientService awsAppConfigClientService;
@@ -50,7 +53,20 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
     }
 
     @Override
+    public void initialize(EvaluationContext evaluationContext) throws Exception {
+        FeatureProvider.super.initialize(evaluationContext);
+
+        awsAppConfigClientService.initialize();
+    }
+
+    @Override
     public void shutdown() {
+        try {
+            awsAppConfigClientService.close();
+        } catch (final Exception e) {
+            throw new ProviderCloseException("failed to close client service", e);
+        }
+
         FeatureProvider.super.shutdown();
     }
 
@@ -60,16 +76,15 @@ public final class AwsAppConfigFeatureProvider implements FeatureProvider {
         return awsAppConfigClientService.state().asProviderState();
     }
 
+    @Requirements(
+        number = "2.2.1",
+        kind = Normative.MUST,
+        by = META_NAME
+    )
     @NotNull
     @Override
     public Metadata getMetadata() {
-        // TODO
-        return new Metadata() {
-            @Override
-            public String getName() {
-                return "";
-            }
-        };
+        return () -> META_NAME;
     }
 
     @NotNull
