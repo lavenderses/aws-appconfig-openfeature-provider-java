@@ -1,12 +1,12 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value;
 
+import static java.util.Objects.requireNonNull;
+
 import dev.openfeature.sdk.ErrorCode;
 import dev.openfeature.sdk.Reason;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Mapping class between "{@link Reason} and {@link ErrorCode}", which is in the OpenFeature world, and
@@ -48,16 +48,11 @@ public enum EvaluationResult {
     ATTRIBUTE_TYPE_MISMATCH(Reason.ERROR, ErrorCode.TYPE_MISMATCH),
     ;
 
-    @NotNull
-    private final Reason reason;
+    @NotNull private final Reason reason;
 
-    @Nullable
-    private final ErrorCode errorCode;
+    @Nullable private final ErrorCode errorCode;
 
-    EvaluationResult(
-        @NotNull final Reason reason,
-        @Nullable final ErrorCode errorCode
-    ) {
+    EvaluationResult(@NotNull final Reason reason, @Nullable final ErrorCode errorCode) {
         this.reason = requireNonNull(reason, "Reason");
         this.errorCode = errorCode;
     }

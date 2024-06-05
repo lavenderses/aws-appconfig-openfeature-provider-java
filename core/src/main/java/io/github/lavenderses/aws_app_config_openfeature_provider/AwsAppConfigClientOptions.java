@@ -16,19 +16,11 @@ import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
 @ToString
 public final class AwsAppConfigClientOptions {
 
-    @NotNull
-    @NonNull
-    private final String applicationName;
+    @NotNull @NonNull private final String applicationName;
 
-    @NotNull
-    @NonNull
-    private final String environmentName;
+    @NotNull @NonNull private final String environmentName;
 
-    @NotNull
-    @NonNull
-    private final String profile;
+    @NotNull @NonNull private final String profile;
 
-    @NotNull
-    @NonNull
-    private final AwsAppConfigProxyConfig awsAppConfigProxyConfig;
+    @NotNull @NonNull private final AwsAppConfigProxyConfig awsAppConfigProxyConfig;
 }

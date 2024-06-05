@@ -8,11 +8,11 @@ import dev.openfeature.sdk.Reason;
 import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
-import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AppConfigValueParseException;
-import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AwsAppConfigParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.converter.AppConfigValueConverter;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AppConfigValueParseException;
+import io.github.lavenderses.aws_app_config_openfeature_provider.parser.AwsAppConfigParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.BooleanAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.DoubleAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.IntegerAttributeParser;
@@ -20,7 +20,8 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAt
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxy;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxyBuilder;
-import jakarta.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,9 +29,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 /**
  * Service layer class for AWS AppConfig.
@@ -40,31 +38,24 @@ final class AwsAppConfigClientService implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(AwsAppConfigClientService.class);
 
     @NotNull
-    private final AtomicReference<AwsAppConfigState> appConfigState = new AtomicReference<>(AwsAppConfigState.NONE);
+    private final AtomicReference<AwsAppConfigState> appConfigState =
+            new AtomicReference<>(AwsAppConfigState.NONE);
 
-    @NotNull
-    private final AwsAppConfigProxy awsAppConfigProxy;
+    @NotNull private final AwsAppConfigProxy awsAppConfigProxy;
 
-    @NotNull
-    private final AwsAppConfigParser awsAppConfigParser;
+    @NotNull private final AwsAppConfigParser awsAppConfigParser;
 
-    @NotNull
-    private final AppConfigValueConverter appConfigValueConverter;
+    @NotNull private final AppConfigValueConverter appConfigValueConverter;
 
-    @NotNull
-    private final BooleanAttributeParser booleanAttributeParser;
+    @NotNull private final BooleanAttributeParser booleanAttributeParser;
 
-    @NotNull
-    private final StringAttributeParser stringAttributeParser;
+    @NotNull private final StringAttributeParser stringAttributeParser;
 
-    @NotNull
-    private final IntegerAttributeParser integerAttributeParser;
+    @NotNull private final IntegerAttributeParser integerAttributeParser;
 
-    @NotNull
-    private final DoubleAttributeParser doubleAttributeParser;
+    @NotNull private final DoubleAttributeParser doubleAttributeParser;
 
-    @NotNull
-    private final ObjectAttributeParser objectAttributeParser;
+    @NotNull private final ObjectAttributeParser objectAttributeParser;
 
     /**
      * This is just for mockito JUnit extension.
@@ -73,21 +64,23 @@ final class AwsAppConfigClientService implements AutoCloseable {
      */
     @VisibleForTesting
     AwsAppConfigClientService(
-        @NotNull final AwsAppConfigProxy awsAppConfigProxy,
-        @NotNull final AwsAppConfigParser awsAppConfigParser,
-        @NotNull final AppConfigValueConverter appConfigValueConverter,
-        @NotNull final BooleanAttributeParser booleanAttributeParser,
-        @NotNull final StringAttributeParser stringAttributeParser,
-        @NotNull final IntegerAttributeParser integerAttributeParser,
-        @NotNull final DoubleAttributeParser doubleAttributeParser,
-        @NotNull final ObjectAttributeParser objectAttributeParser
-    ) {
+            @NotNull final AwsAppConfigProxy awsAppConfigProxy,
+            @NotNull final AwsAppConfigParser awsAppConfigParser,
+            @NotNull final AppConfigValueConverter appConfigValueConverter,
+            @NotNull final BooleanAttributeParser booleanAttributeParser,
+            @NotNull final StringAttributeParser stringAttributeParser,
+            @NotNull final IntegerAttributeParser integerAttributeParser,
+            @NotNull final DoubleAttributeParser doubleAttributeParser,
+            @NotNull final ObjectAttributeParser objectAttributeParser) {
         this.awsAppConfigProxy = requireNonNull(awsAppConfigProxy, "awsAppConfigProxy");
         this.awsAppConfigParser = requireNonNull(awsAppConfigParser, "AwsAppConfigParse");
-        this.appConfigValueConverter = requireNonNull(appConfigValueConverter, "appConfigValueConverter");
-        this.booleanAttributeParser = requireNonNull(booleanAttributeParser, "booleanAttributeParser");
+        this.appConfigValueConverter =
+                requireNonNull(appConfigValueConverter, "appConfigValueConverter");
+        this.booleanAttributeParser =
+                requireNonNull(booleanAttributeParser, "booleanAttributeParser");
         this.stringAttributeParser = requireNonNull(stringAttributeParser, "stringAttributeParser");
-        this.integerAttributeParser = requireNonNull(integerAttributeParser, "integerAttributeParser");
+        this.integerAttributeParser =
+                requireNonNull(integerAttributeParser, "integerAttributeParser");
         this.doubleAttributeParser = requireNonNull(doubleAttributeParser, "doubleAttributeParser");
         this.objectAttributeParser = requireNonNull(objectAttributeParser, "objectAttributeParser");
     }
@@ -103,9 +96,7 @@ final class AwsAppConfigClientService implements AutoCloseable {
     AwsAppConfigClientService(@NotNull final AwsAppConfigClientOptions options) {
         log.info("Initializing AWS AppConfig with config: {}", options);
 
-        awsAppConfigProxy = AwsAppConfigProxyBuilder.build(
-            /* options = */ options
-        );
+        awsAppConfigProxy = AwsAppConfigProxyBuilder.build(/* options= */ options);
         awsAppConfigParser = new AwsAppConfigParser();
         appConfigValueConverter = new AppConfigValueConverter();
         booleanAttributeParser = new BooleanAttributeParser();
@@ -139,105 +130,104 @@ final class AwsAppConfigClientService implements AutoCloseable {
      */
     @NotNull
     EvaluationValue<Boolean> getBoolean(
-        @NotNull final String key,
-        @NotNull final Boolean defaultValue
-    ) {
+            @NotNull final String key, @NotNull final Boolean defaultValue) {
         try {
             return getInternal(
-                /* key = */ key,
-                /* defaultValue = */ defaultValue,
-                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
-                    /* key = */ key,
-                    /* value = */ responseBody,
-                    /* buildAppConfigValue = */ booleanAttributeParser
-                )
-            );
+                    /* key= */ key,
+                    /* defaultValue= */ defaultValue,
+                    /* parseFromResponseBody= */ (@Language("json")
+                            final String responseBody) ->
+                            awsAppConfigParser.parse(
+                                    /* key= */ key,
+                                    /* value= */ responseBody,
+                                    /* buildAppConfigValue= */ booleanAttributeParser));
         } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            log.error(
+                    "Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value",
+                    e);
             return e.asErrorEvaluationResult();
         }
     }
 
     @NotNull
     EvaluationValue<String> getString(
-        @NotNull final String key,
-        @NotNull final String defaultValue
-    ) {
+            @NotNull final String key, @NotNull final String defaultValue) {
         try {
             return getInternal(
-                /* key = */ key,
-                /* defaultValue = */ defaultValue,
-                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
-                    /* key = */ key,
-                    /* value = */ responseBody,
-                    /* buildAppConfigValue = */ stringAttributeParser
-                )
-            );
+                    /* key= */ key,
+                    /* defaultValue= */ defaultValue,
+                    /* parseFromResponseBody= */ (@Language("json")
+                            final String responseBody) ->
+                            awsAppConfigParser.parse(
+                                    /* key= */ key,
+                                    /* value= */ responseBody,
+                                    /* buildAppConfigValue= */ stringAttributeParser));
         } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            log.error(
+                    "Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value",
+                    e);
             return e.asErrorEvaluationResult();
         }
     }
 
     @NotNull
     EvaluationValue<Integer> getInteger(
-        @NotNull final String key,
-        @NotNull final Integer defaultValue
-    ) {
+            @NotNull final String key, @NotNull final Integer defaultValue) {
         try {
             return getInternal(
-                /* key = */ key,
-                /* defaultValue = */ defaultValue,
-                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
-                    /* key = */ key,
-                    /* value = */ responseBody,
-                    /* buildAppConfigValue = */ integerAttributeParser
-                )
-            );
+                    /* key= */ key,
+                    /* defaultValue= */ defaultValue,
+                    /* parseFromResponseBody= */ (@Language("json")
+                            final String responseBody) ->
+                            awsAppConfigParser.parse(
+                                    /* key= */ key,
+                                    /* value= */ responseBody,
+                                    /* buildAppConfigValue= */ integerAttributeParser));
         } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            log.error(
+                    "Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value",
+                    e);
             return e.asErrorEvaluationResult();
         }
     }
 
     @NotNull
     EvaluationValue<Double> getDouble(
-        @NotNull final String key,
-        @NotNull final Double defaultValue
-    ) {
+            @NotNull final String key, @NotNull final Double defaultValue) {
         try {
             return getInternal(
-                /* key = */ key,
-                /* defaultValue = */ defaultValue,
-                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
-                    /* key = */ key,
-                    /* value = */ responseBody,
-                    /* buildAppConfigValue = */ doubleAttributeParser
-                )
-            );
+                    /* key= */ key,
+                    /* defaultValue= */ defaultValue,
+                    /* parseFromResponseBody= */ (@Language("json")
+                            final String responseBody) ->
+                            awsAppConfigParser.parse(
+                                    /* key= */ key,
+                                    /* value= */ responseBody,
+                                    /* buildAppConfigValue= */ doubleAttributeParser));
         } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            log.error(
+                    "Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value",
+                    e);
             return e.asErrorEvaluationResult();
         }
     }
 
     @NotNull
-    EvaluationValue<Value> getValue(
-        @NotNull final String key,
-        @NotNull final Value defaultValue
-    ) {
+    EvaluationValue<Value> getValue(@NotNull final String key, @NotNull final Value defaultValue) {
         try {
             return getObjectInternal(
-                /* key = */ key,
-                /* defaultValue = */ defaultValue,
-                /* parseFromResponseBody = */ (@Language("json") final String responseBody) -> awsAppConfigParser.parse(
-                    /* key = */ key,
-                    /* value = */ responseBody,
-                    /* buildAppConfigValue = */ objectAttributeParser
-                )
-            );
+                    /* key= */ key,
+                    /* defaultValue= */ defaultValue,
+                    /* parseFromResponseBody= */ (@Language("json")
+                            final String responseBody) ->
+                            awsAppConfigParser.parse(
+                                    /* key= */ key,
+                                    /* value= */ responseBody,
+                                    /* buildAppConfigValue= */ objectAttributeParser));
         } catch (final AppConfigValueParseException e) {
-            log.error("Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value", e);
+            log.error(
+                    "Failed to parseFromResponseBody object from AWS AppConfig response. Fall back to default flag value",
+                    e);
             return e.asErrorEvaluationResult();
         }
     }
@@ -255,40 +245,30 @@ final class AwsAppConfigClientService implements AutoCloseable {
      */
     @NotNull
     private <T, V extends AppConfigValue<T>> EvaluationValue<T> getInternal(
-        @NotNull final String key,
-        @NotNull final T defaultValue,
-        @NotNull final Function<String, V> parseFromResponseBody
-    ) {
+            @NotNull final String key,
+            @NotNull final T defaultValue,
+            @NotNull final Function<String, V> parseFromResponseBody) {
         final String responseBody;
         try {
-            responseBody = awsAppConfigProxy.getRawFlagObject(
-                /* key = */ key
-            );
+            responseBody = awsAppConfigProxy.getRawFlagObject(/* key= */ key);
         } catch (final Exception e) {
             log.error("Failed to get response from AppConfig.", e);
 
             return new ErrorEvaluationValue<>(
-                /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
-                /* errorMessage = */ null,
-                /* reason = */ Reason.DEFAULT
-            );
+                    /* errorCode= */ ErrorCode.FLAG_NOT_FOUND,
+                    /* errorMessage= */ null,
+                    /* reason= */ Reason.DEFAULT);
         }
         if (isNull(responseBody)) {
-            return parseErrorEvaluationValue(
-                /* errorMessage = */ null
-            );
+            return parseErrorEvaluationValue(/* errorMessage= */ null);
         }
 
         // Parse SDK response as boolean feature flag. Exception handling is on top.
-        final V flagValue = parseFromResponseBody.apply(
-            /* t = */ responseBody
-        );
+        final V flagValue = parseFromResponseBody.apply(/* t= */ responseBody);
         log.info("Flag value [{}: {}] fetched.", key, flagValue.getValue());
 
         return appConfigValueConverter.toPrimitiveEvaluationValue(
-            /* defaultValue = */ defaultValue,
-            /* appConfigValue = */ flagValue
-        );
+                /* defaultValue= */ defaultValue, /* appConfigValue= */ flagValue);
     }
 
     /**
@@ -302,47 +282,36 @@ final class AwsAppConfigClientService implements AutoCloseable {
      */
     @NotNull
     private EvaluationValue<Value> getObjectInternal(
-        @NotNull final String key,
-        @NotNull final Value defaultValue,
-        @NotNull final Function<String, AppConfigObjectValue> parseFromResponseBody
-    ) {
+            @NotNull final String key,
+            @NotNull final Value defaultValue,
+            @NotNull final Function<String, AppConfigObjectValue> parseFromResponseBody) {
         final String responseBody;
         try {
-            responseBody = awsAppConfigProxy.getRawFlagObject(
-                /* key = */ key
-            );
+            responseBody = awsAppConfigProxy.getRawFlagObject(/* key= */ key);
         } catch (final Exception e) {
             log.error("Failed to get response from AppConfig.", e);
 
             return new ErrorEvaluationValue<>(
-                /* errorCode = */ ErrorCode.FLAG_NOT_FOUND,
-                /* errorMessage = */ null,
-                /* reason = */ Reason.DEFAULT
-            );
+                    /* errorCode= */ ErrorCode.FLAG_NOT_FOUND,
+                    /* errorMessage= */ null,
+                    /* reason= */ Reason.DEFAULT);
         }
         if (isNull(responseBody)) {
-            return parseErrorEvaluationValue(
-                /* errorMessage = */ null
-            );
+            return parseErrorEvaluationValue(/* errorMessage= */ null);
         }
 
         // Parse SDK response as boolean feature flag. Exception handling is on top.
-        final AppConfigObjectValue flagValue = parseFromResponseBody.apply(
-            /* t = */ responseBody
-        );
+        final AppConfigObjectValue flagValue = parseFromResponseBody.apply(/* t= */ responseBody);
         log.info("Flag value [{}: {}] fetched.", key, flagValue.getValue().asStructure().asMap());
 
         return appConfigValueConverter.toObjectEvaluationValue(
-            /* defaultValue = */ defaultValue,
-            /* appConfigValue = */ flagValue
-        );
+                /* defaultValue= */ defaultValue, /* appConfigValue= */ flagValue);
     }
 
     private <T> EvaluationValue<T> parseErrorEvaluationValue(@Nullable final String errorMessage) {
         return new ErrorEvaluationValue<>(
-            /* errorCode = */ ErrorCode.PARSE_ERROR,
-            /* errorMessage = */ errorMessage,
-            /* reason = */ Reason.ERROR
-        );
+                /* errorCode= */ ErrorCode.PARSE_ERROR,
+                /* errorMessage= */ errorMessage,
+                /* reason= */ Reason.ERROR);
     }
 }

@@ -10,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
  * Parser implementation for double-type feature flag value.
  * This is for int type, but feature flag type will be a number in OpenFeature world.
  */
-public final class DoubleAttributeParser extends AbstractAttributeParser<Double, AppConfigDoubleValue> {
+public final class DoubleAttributeParser
+        extends AbstractAttributeParser<Double, AppConfigDoubleValue> {
 
     /**
      * Extract "Attribute" as Double in JSON response from AWS AppConfig.
@@ -20,18 +21,14 @@ public final class DoubleAttributeParser extends AbstractAttributeParser<Double,
      * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
      */
     @Override
-    public AppConfigDoubleValue apply(
-        @NotNull JsonNode keyNode
-    ) {
-        final JsonNode flagValueNode = getValidFlagValueNode(
-            /* keyNode = */ keyNode,
-            /* expectedNodeType = */ JsonNodeType.NUMBER
-        );
+    public AppConfigDoubleValue apply(@NotNull JsonNode keyNode) {
+        final JsonNode flagValueNode =
+                getValidFlagValueNode(
+                        /* keyNode= */ keyNode, /* expectedNodeType= */ JsonNodeType.NUMBER);
 
         return new AppConfigDoubleValue(
-            /* enabled = */ enabled(keyNode),
-            /* value = */ flagValueNode.asDouble(),
-            /* responseNode = */ keyNode.toString()
-        );
+                /* enabled= */ enabled(keyNode),
+                /* value= */ flagValueNode.asDouble(),
+                /* responseNode= */ keyNode.toString());
     }
 }

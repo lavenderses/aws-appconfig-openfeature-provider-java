@@ -11,21 +11,16 @@ import org.jetbrains.annotations.NotNull;
 public final class AwsAppConfigProxyBuilder {
 
     @NotNull
-    public static AwsAppConfigProxy build(
-        @NotNull final AwsAppConfigClientOptions options
-        ) {
+    public static AwsAppConfigProxy build(@NotNull final AwsAppConfigClientOptions options) {
         final AwsAppConfigProxyConfig config = options.getAwsAppConfigProxyConfig();
 
         if (config instanceof AwsAppConfigAgentProxyConfig) {
             return new AwsAppConfigAgentProxy(
-                /* option = */ options,
-                /* config = */ (AwsAppConfigAgentProxyConfig) config
-            );
+                    /* option= */ options, /* config= */ (AwsAppConfigAgentProxyConfig) config);
         } else if (config instanceof AwsAppConfigDataClientProxyConfig) {
             return new AwsAppConfigDataClientProxy(
-                /* options = */ options,
-                /* config = */ (AwsAppConfigDataClientProxyConfig) config
-            );
+                    /* options= */ options,
+                    /* config= */ (AwsAppConfigDataClientProxyConfig) config);
         } else {
             throw new IllegalArgumentException(String.format("unknown type of config: %s", config));
         }

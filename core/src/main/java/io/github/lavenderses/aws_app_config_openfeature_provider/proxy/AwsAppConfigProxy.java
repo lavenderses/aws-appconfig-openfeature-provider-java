@@ -30,7 +30,5 @@ public interface AwsAppConfigProxy extends AutoCloseable {
      */
     @Language("json")
     @Nullable
-    String getRawFlagObject(
-        @NotNull final String key
-    );
+    String getRawFlagObject(@NotNull final String key);
 }

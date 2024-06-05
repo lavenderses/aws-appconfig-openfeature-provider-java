@@ -1,5 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value;
 
+import static java.util.Objects.nonNull;
+
 import dev.openfeature.sdk.ErrorCode;
 import dev.openfeature.sdk.ProviderEvaluation;
 import dev.openfeature.sdk.Reason;
@@ -12,33 +14,26 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static java.util.Objects.nonNull;
-
 /**
  * Error value builder for {@link ProviderEvaluation}.
  */
 @Requirements(
-    number = "2.2.7",
-    kind = Normative.MUST,
-    by = "Each field in this class." +
-       "This class annotate errorCode and errorMessage as NOT-null. And providerEvaluation method uses them. Thus" +
-       "return value as ProviderEvaluation will contains errorCode and (optional) errorMessage."
-)
+        number = "2.2.7",
+        kind = Normative.MUST,
+        by =
+                "Each field in this class."
+                        + "This class annotate errorCode and errorMessage as NOT-null. And providerEvaluation method uses them. Thus"
+                        + "return value as ProviderEvaluation will contains errorCode and (optional) errorMessage.")
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
 public class ErrorEvaluationValue<T> implements EvaluationValue<T> {
 
-    @NotNull
-    @NonNull
-    private final ErrorCode errorCode;
+    @NotNull @NonNull private final ErrorCode errorCode;
 
-    @Nullable
-    private final String errorMessage;
+    @Nullable private final String errorMessage;
 
-    @NotNull
-    @NonNull
-    private final Reason reason;
+    @NotNull @NonNull private final Reason reason;
 
     @NotNull
     @Override
@@ -49,15 +44,16 @@ public class ErrorEvaluationValue<T> implements EvaluationValue<T> {
     @NotNull
     @Override
     public ProviderEvaluation<T> providerEvaluation() {
-        final ProviderEvaluation.ProviderEvaluationBuilder<T> builder = ProviderEvaluation.builder();
+        final ProviderEvaluation.ProviderEvaluationBuilder<T> builder =
+                ProviderEvaluation.builder();
 
         if (nonNull(errorMessage)) {
             builder.errorMessage(errorMessage);
         }
 
         return builder.errorCode(errorCode)
-            .reason(reason().name())
-            .flagMetadata(metadata())
-            .build();
+                .reason(reason().name())
+                .flagMetadata(metadata())
+                .build();
     }
 }

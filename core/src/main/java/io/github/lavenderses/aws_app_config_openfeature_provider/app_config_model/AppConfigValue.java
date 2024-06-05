@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
  * So, this Provider implementation expects following schema.
  * {@code flag_value} is the fixed key name (THIS IS the schema in this implementation). The value mapped to this key
  * will be used when {@code enable} value
- is {@code true}.
+ * is {@code true}.
  * See also in {@link AppConfigValueKey}.
  * <pre>
  * {@code
@@ -63,13 +63,9 @@ public abstract class AppConfigValue<T> {
      * }
      * </pre>
      */
-    @NotNull
-    @NonNull
-    protected final Boolean enabled;
+    @NotNull @NonNull protected final Boolean enabled;
 
-    @NotNull
-    @NonNull
-    protected final T value;
+    @NotNull @NonNull protected final T value;
 
     /**
      * JSON schema response from AWS AppConfig. This field is just for error message.

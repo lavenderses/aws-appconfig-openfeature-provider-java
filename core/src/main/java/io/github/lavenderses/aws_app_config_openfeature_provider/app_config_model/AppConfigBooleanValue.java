@@ -1,13 +1,12 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
 
+import static java.util.Objects.requireNonNull;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Boolean type in AWS AppConfig's Attribute.<br/>
@@ -19,14 +18,12 @@ import static java.util.Objects.requireNonNull;
 public final class AppConfigBooleanValue extends AppConfigValue<Boolean> {
 
     public AppConfigBooleanValue(
-        @NotNull Boolean enabled,
-        @NotNull Boolean value,
-        @Language("json") @NotNull String jsonFormat
-    ) {
+            @NotNull Boolean enabled,
+            @NotNull Boolean value,
+            @Language("json") @NotNull String jsonFormat) {
         super(
-            /* enabled = */ requireNonNull(enabled, "enabled"),
-            /* value = */ requireNonNull(value, "value"),
-            /* jsonFormat = */ requireNonNull(jsonFormat, "jsonFormat")
-        );
+                /* enabled= */ requireNonNull(enabled, "enabled"),
+                /* value= */ requireNonNull(value, "value"),
+                /* jsonFormat= */ requireNonNull(jsonFormat, "jsonFormat"));
     }
 }

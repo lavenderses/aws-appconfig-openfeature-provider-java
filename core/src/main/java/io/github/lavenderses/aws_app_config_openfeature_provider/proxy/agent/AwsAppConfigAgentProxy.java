@@ -1,23 +1,22 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy.agent;
 
+import static java.util.Objects.requireNonNull;
+
 import io.github.lavenderses.aws_app_config_openfeature_provider.AwsAppConfigClientOptions;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AbstractAwsAppConfigProxy;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxyException;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config.AwsAppConfigAgentProxyConfig;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
-import static java.util.Objects.requireNonNull;
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 /**
  * Provider implementation proxy for accessing AWS AppConfig instance via AWS AppConfig agent.
@@ -27,17 +26,13 @@ import static java.util.Objects.requireNonNull;
  */
 public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
 
-    @NotNull
-    private final AwsAppConfigClientOptions options;
+    @NotNull private final AwsAppConfigClientOptions options;
 
-    @NotNull
-    private final AwsAppConfigAgentProxyConfig config;
+    @NotNull private final AwsAppConfigAgentProxyConfig config;
 
-    @NotNull
-    private final HttpClient httpClient;
+    @NotNull private final HttpClient httpClient;
 
-    @NotNull
-    private final HttpResponse.BodyHandler<String> handler ;
+    @NotNull private final HttpResponse.BodyHandler<String> handler;
 
     /**
      * This is just for mockito JUnit extension.
@@ -46,11 +41,10 @@ public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
      */
     @VisibleForTesting
     AwsAppConfigAgentProxy(
-        @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final AwsAppConfigAgentProxyConfig awsAppConfigProxyConfig,
-        @NotNull final HttpClient httpClient,
-        @NotNull final HttpResponse.BodyHandler<String> handler
-        ) {
+            @NotNull final AwsAppConfigClientOptions options,
+            @NotNull final AwsAppConfigAgentProxyConfig awsAppConfigProxyConfig,
+            @NotNull final HttpClient httpClient,
+            @NotNull final HttpResponse.BodyHandler<String> handler) {
         super();
 
         this.options = requireNonNull(options, "aws");
@@ -60,9 +54,8 @@ public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
     }
 
     public AwsAppConfigAgentProxy(
-        @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final AwsAppConfigAgentProxyConfig awsAppConfigProxyConfig
-    ) {
+            @NotNull final AwsAppConfigClientOptions options,
+            @NotNull final AwsAppConfigAgentProxyConfig awsAppConfigProxyConfig) {
         super();
 
         this.options = requireNonNull(options, "aws");
@@ -89,53 +82,37 @@ public final class AwsAppConfigAgentProxy extends AbstractAwsAppConfigProxy {
     public String getRawFlagObject(@NotNull String key) {
         final URI requestUri;
         try {
-            requestUri = new URI(
-                /* schema = */ config.getEndpoint().getScheme(),
-                /* userInfo = */ config.getEndpoint().getUserInfo(),
-                /* host = */ config.getEndpoint().getHost(),
-                /* port = */ config.getEndpoint().getPort(),
-                /* path = */ String.format(
-                    "/applications/%s/environments/%s/configurations/%s",
-                    options.getApplicationName(),
-                    options.getEnvironmentName(),
-                    options.getProfile()
-                ),
-                /* query = */ String.format(
-                    "flag=%s",
-                    key
-                ),
-                /* fragment = */ null
-            );
+            requestUri =
+                    new URI(
+                            /* schema= */ config.getEndpoint().getScheme(),
+                            /* userInfo= */ config.getEndpoint().getUserInfo(),
+                            /* host= */ config.getEndpoint().getHost(),
+                            /* port= */ config.getEndpoint().getPort(),
+                            /* path= */ String.format(
+                                    "/applications/%s/environments/%s/configurations/%s",
+                                    options.getApplicationName(),
+                                    options.getEnvironmentName(),
+                                    options.getProfile()),
+                            /* query= */ String.format("flag=%s", key),
+                            /* fragment= */ null);
         } catch (final URISyntaxException e) {
             throw new AwsAppConfigProxyException(
-                /* message = */ String.format(
-                    "Invalid URI from configuration and flag key: config = %s, key = %s",
-                    config,
-                    key
-                ),
-                /* exception = */ e
-            );
+                    /* message= */ String.format(
+                            "Invalid URI from configuration and flag key: config = %s, key = %s",
+                            config, key),
+                    /* exception= */ e);
         }
 
-        final HttpRequest request = HttpRequest.newBuilder()
-            .uri(requestUri)
-            .GET()
-            .build();
+        final HttpRequest request = HttpRequest.newBuilder().uri(requestUri).GET().build();
 
         final HttpResponse<String> response;
         try {
-            response = httpClient.send(
-                /* request = */ request,
-                /* responseBodyHandler = */ handler
-            );
+            response = httpClient.send(/* request= */ request, /* responseBodyHandler= */ handler);
         } catch (final IOException | InterruptedException e) {
             throw new AwsAppConfigProxyException(
-                /* message = */ String.format(
-                    "Failed to call to AWS AppConfig agent: %s",
-                    requestUri
-                ),
-                /* exception = */ e
-            );
+                    /* message= */ String.format(
+                            "Failed to call to AWS AppConfig agent: %s", requestUri),
+                    /* exception= */ e);
         }
 
         return response.body();

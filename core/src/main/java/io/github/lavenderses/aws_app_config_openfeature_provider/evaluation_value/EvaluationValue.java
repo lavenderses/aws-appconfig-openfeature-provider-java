@@ -33,12 +33,12 @@ public interface EvaluationValue<T> {
 
     // TODO change to EvaluationResult
     @Requirements(
-        number = "2.2.5",
-        kind = Normative.SHOULD,
-        by = "Implementing this interface method." +
-            "This method will be called on each `providerEvaluation` method and the returned value (`Reason`) will be" +
-            "set to ProviderEvaluation field."
-    )
+            number = "2.2.5",
+            kind = Normative.SHOULD,
+            by =
+                    "Implementing this interface method."
+                            + "This method will be called on each `providerEvaluation` method and the returned value (`Reason`) will be"
+                            + "set to ProviderEvaluation field.")
     @NotNull
     Reason reason();
 

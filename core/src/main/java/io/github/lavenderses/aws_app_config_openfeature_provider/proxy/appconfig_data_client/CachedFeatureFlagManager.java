@@ -1,5 +1,8 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy.appconfig_data_client;
 
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +15,11 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.task.ScheduledT
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -23,15 +31,6 @@ import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfiguratio
 import software.amazon.awssdk.services.appconfigdata.model.GetLatestConfigurationResponse;
 import software.amazon.awssdk.services.appconfigdata.model.StartConfigurationSessionRequest;
 import software.amazon.awssdk.services.appconfigdata.model.StartConfigurationSessionResponse;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Management class of on-memory-cached feature flag.
@@ -59,15 +58,11 @@ final class CachedFeatureFlagManager implements AutoCloseable {
 
             try {
                 // get latest feature flag from AWS AppConfig
-                final GetLatestConfigurationResponse response = getLatestConfigurationResponse(
-                    /* credential = */ oldCache.getToken()
-                );
+                final GetLatestConfigurationResponse response =
+                        getLatestConfigurationResponse(/* credential= */ oldCache.getToken());
 
                 // update token and feature flag
-                newCache = newCache(
-                    /* oldCache = */ oldCache,
-                    /* response = */ response
-                );
+                newCache = newCache(/* oldCache= */ oldCache, /* response= */ response);
             } catch (final Exception e) {
                 log.error("Failed to update feature flag cache", e);
                 return;
@@ -81,15 +76,13 @@ final class CachedFeatureFlagManager implements AutoCloseable {
 
         @VisibleForTesting
         GetLatestConfigurationResponse getLatestConfigurationResponse(
-            @NotNull final Credential token
-        ) {
-            final GetLatestConfigurationRequest request = GetLatestConfigurationRequest.builder()
-                .configurationToken(token.getRawValue())
-                .build();
+                @NotNull final Credential token) {
+            final GetLatestConfigurationRequest request =
+                    GetLatestConfigurationRequest.builder()
+                            .configurationToken(token.getRawValue())
+                            .build();
 
-            return client.getLatestConfiguration(
-                /* startConfigurationSessionRequest = */ request
-            );
+            return client.getLatestConfiguration(/* startConfigurationSessionRequest= */ request);
         }
 
         /**
@@ -98,23 +91,21 @@ final class CachedFeatureFlagManager implements AutoCloseable {
         @Nullable
         @VisibleForTesting
         FeatureFlagCache newCache(
-            @NotNull final FeatureFlagCache oldCache,
-            @NotNull final GetLatestConfigurationResponse response
-        ) {
+                @NotNull final FeatureFlagCache oldCache,
+                @NotNull final GetLatestConfigurationResponse response) {
             // Update cache for the next configuration poll
-            final Credential pollingToken = Credential.builder()
-                .rawValue(response.nextPollConfigurationToken())
-                .build();
+            final Credential pollingToken =
+                    Credential.builder().rawValue(response.nextPollConfigurationToken()).build();
 
             final String jsonResponse = response.configuration().asUtf8String();
             if (jsonResponse.isEmpty()) {
-                log.info("Response from AWS AppConfig is empty. Flag is latest, so skip updating cache.");
-                log.debug("See more for https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/appconfigdata/AppConfigDataClient.html");
+                log.info(
+                        "Response from AWS AppConfig is empty. Flag is latest, so skip updating cache.");
+                log.debug(
+                        "See more for https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/appconfigdata/AppConfigDataClient.html");
 
                 // just update token
-                return oldCache.toBuilder()
-                    .token(pollingToken)
-                    .build();
+                return oldCache.toBuilder().token(pollingToken).build();
             }
 
             final JsonNode value;
@@ -122,14 +113,11 @@ final class CachedFeatureFlagManager implements AutoCloseable {
                 value = OBJECT_MAPPER.readTree(jsonResponse);
             } catch (final JsonProcessingException e) {
                 log.error(
-                    "Unexpected response from AWS AppConfig: {}. Skip updating cache.",
-                    response.configuration(),
-                    e
-                );
+                        "Unexpected response from AWS AppConfig: {}. Skip updating cache.",
+                        response.configuration(),
+                        e);
                 // just update token
-                return oldCache.toBuilder()
-                    .token(pollingToken)
-                    .build();
+                return oldCache.toBuilder().token(pollingToken).build();
             }
 
             final Map<String, JsonNode> newFeatureFlags = new HashMap<>();
@@ -139,20 +127,16 @@ final class CachedFeatureFlagManager implements AutoCloseable {
             }
 
             // update token and feature flag
-            return oldCache.toBuilder()
-                .token(pollingToken)
-                .flags(newFeatureFlags)
-                .build();
+            return oldCache.toBuilder().token(pollingToken).flags(newFeatureFlags).build();
         }
     }
 
-    @NotNull
-    private final AwsAppConfigClientOptions options;
+    @NotNull private final AwsAppConfigClientOptions options;
 
-    @NotNull
-    private final AppConfigDataClient client;
+    @NotNull private final AppConfigDataClient client;
 
-    private final AtomicReference<FeatureFlagCache> responseCache = new AtomicReference<>(FeatureFlagCache.EMPTY);
+    private final AtomicReference<FeatureFlagCache> responseCache =
+            new AtomicReference<>(FeatureFlagCache.EMPTY);
 
     private final ScheduledTaskExecutor scheduledTaskExecutor;
 
@@ -166,10 +150,9 @@ final class CachedFeatureFlagManager implements AutoCloseable {
 
     @VisibleForTesting
     CachedFeatureFlagManager(
-        @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final AppConfigDataClient client,
-        @NotNull final ScheduledTaskExecutor scheduledTaskExecutor
-    ) {
+            @NotNull final AwsAppConfigClientOptions options,
+            @NotNull final AppConfigDataClient client,
+            @NotNull final ScheduledTaskExecutor scheduledTaskExecutor) {
         this.options = requireNonNull(options, "options");
         this.client = requireNonNull(client, "client");
         this.scheduledTaskExecutor = requireNonNull(scheduledTaskExecutor, "scheduledTaskExecutor");
@@ -177,27 +160,26 @@ final class CachedFeatureFlagManager implements AutoCloseable {
     }
 
     CachedFeatureFlagManager(
-        @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final AwsAppConfigDataClientProxyConfig config,
-        final boolean startSession
-    ) {
+            @NotNull final AwsAppConfigClientOptions options,
+            @NotNull final AwsAppConfigDataClientProxyConfig config,
+            final boolean startSession) {
         this.options = requireNonNull(options, "options");
         this.startSession = startSession;
 
-        final AppConfigDataClientBuilder builder = AppConfigDataClient.builder()
-            .region(config.getRegion());
-        final Consumer<AppConfigDataClientBuilder> configure =config.getConfigure();
+        final AppConfigDataClientBuilder builder =
+                AppConfigDataClient.builder().region(config.getRegion());
+        final Consumer<AppConfigDataClientBuilder> configure = config.getConfigure();
         if (nonNull(configure)) {
             configure.accept(builder);
         }
         this.client = builder.build();
 
-        scheduledTaskExecutor = new ScheduledTaskExecutor(
-            /* option = */ ScheduledTaskOption.builder()
-                .delay(config.getPollingDelay())
-                .taskName("cachedFeatureFlagUpdateTask")
-                .build()
-        );
+        scheduledTaskExecutor =
+                new ScheduledTaskExecutor(
+                        /* option= */ ScheduledTaskOption.builder()
+                                .delay(config.getPollingDelay())
+                                .taskName("cachedFeatureFlagUpdateTask")
+                                .build());
     }
 
     /**
@@ -213,9 +195,7 @@ final class CachedFeatureFlagManager implements AutoCloseable {
         initSession();
 
         // start scheduled task to update token
-        scheduledTaskExecutor.start(
-            /* task = */ task
-        );
+        scheduledTaskExecutor.start(/* task= */ task);
     }
 
     @PreDestroy
@@ -230,26 +210,21 @@ final class CachedFeatureFlagManager implements AutoCloseable {
         log.info("Start initializing AWS AppConfig token");
 
         // TODO: error handling
-        final StartConfigurationSessionRequest request = StartConfigurationSessionRequest.builder()
-            .applicationIdentifier(options.getApplicationName())
-            .environmentIdentifier(options.getEnvironmentName())
-            .configurationProfileIdentifier(options.getProfile())
-            .build();
+        final StartConfigurationSessionRequest request =
+                StartConfigurationSessionRequest.builder()
+                        .applicationIdentifier(options.getApplicationName())
+                        .environmentIdentifier(options.getEnvironmentName())
+                        .configurationProfileIdentifier(options.getProfile())
+                        .build();
 
-        final StartConfigurationSessionResponse response = client.startConfigurationSession(
-            /* startConfigurationSessionRequest = */ request
-        );
+        final StartConfigurationSessionResponse response =
+                client.startConfigurationSession(/* startConfigurationSessionRequest= */ request);
         final String initToken = response.initialConfigurationToken();
         responseCache.getAndUpdate(
-            (oldFeatureFlagCache) -> oldFeatureFlagCache
-                .toBuilder()
-                .token(
-                    Credential.builder()
-                        .rawValue(initToken)
-                        .build()
-                )
-                .build()
-        );
+                (oldFeatureFlagCache) ->
+                        oldFeatureFlagCache.toBuilder()
+                                .token(Credential.builder().rawValue(initToken).build())
+                                .build());
 
         log.info("Initialized AWS AppConfig token");
     }
@@ -259,9 +234,7 @@ final class CachedFeatureFlagManager implements AutoCloseable {
      * The return value will be null if the feature flag associated with {@param key} does not found.
      */
     @Nullable
-    JsonNode getCachedFeatureFlagByKeyFrom(
-        @NotNull final String key
-    ) {
+    JsonNode getCachedFeatureFlagByKeyFrom(@NotNull final String key) {
         requireNonNull(key, "Key");
 
         final FeatureFlagCache cache = responseCache.get();

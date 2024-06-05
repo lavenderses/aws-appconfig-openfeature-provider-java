@@ -1,5 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value;
 
+import static java.util.Objects.requireNonNull;
+
 import dev.openfeature.sdk.ProviderEvaluation;
 import dev.openfeature.sdk.Reason;
 import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Normative;
@@ -7,8 +9,6 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.meta.Requiremen
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Actual flag value holder class. This class means that flag fetching from AWS AppConfig succeeded
@@ -21,19 +21,16 @@ import static java.util.Objects.requireNonNull;
 public abstract class SuccessEvaluationValue<T> implements EvaluationValue<T> {
 
     @Requirements(
-        number = "2.2.3",
-        kind = Normative.MUST,
-        by = "Containing this wrapped value as value in resolution details." +
-            "(SuccessEvaluationValue represents 'succeeded normal execution'.)"
-    )
+            number = "2.2.3",
+            kind = Normative.MUST,
+            by =
+                    "Containing this wrapped value as value in resolution details."
+                            + "(SuccessEvaluationValue represents 'succeeded normal execution'.)")
     private final T wrappedValue;
 
     private final Reason reason;
 
-    SuccessEvaluationValue(
-        @NotNull T wrappedValue,
-        @NotNull Reason reason
-    ) {
+    SuccessEvaluationValue(@NotNull T wrappedValue, @NotNull Reason reason) {
         this.wrappedValue = requireNonNull(wrappedValue, "wrappedValue");
         this.reason = requireNonNull(reason, "reason");
     }
@@ -44,17 +41,14 @@ public abstract class SuccessEvaluationValue<T> implements EvaluationValue<T> {
         return reason;
     }
 
-    @Requirements(
-        number = "2.2.6",
-        kind = Normative.MUST_NOT
-    )
+    @Requirements(number = "2.2.6", kind = Normative.MUST_NOT)
     @NotNull
     @Override
     public ProviderEvaluation<T> providerEvaluation() {
         return ProviderEvaluation.<T>builder()
-            .value(wrappedValue)
-            .reason(reason().name())
-            .flagMetadata(metadata())
-            .build();
+                .value(wrappedValue)
+                .reason(reason().name())
+                .flagMetadata(metadata())
+                .build();
     }
 }

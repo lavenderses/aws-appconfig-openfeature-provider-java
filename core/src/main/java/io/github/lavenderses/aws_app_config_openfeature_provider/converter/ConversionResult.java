@@ -12,11 +12,7 @@ import org.jetbrains.annotations.NotNull;
 @Data
 class ConversionResult<T> {
 
-    @NotNull
-    @NonNull
-    private final T featureFlagValue;
+    @NotNull @NonNull private final T featureFlagValue;
 
-    @NotNull
-    @NonNull
-    private final EvaluationResult evaluationResult;
+    @NotNull @NonNull private final EvaluationResult evaluationResult;
 }

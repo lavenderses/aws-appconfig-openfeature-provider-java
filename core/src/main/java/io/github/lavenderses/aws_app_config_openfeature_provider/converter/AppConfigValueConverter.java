@@ -1,5 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.converter;
 
+import static java.util.Objects.requireNonNull;
+
 import dev.openfeature.sdk.FlagEvaluationDetails;
 import dev.openfeature.sdk.Value;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
@@ -11,8 +13,6 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_valu
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.SuccessEvaluationValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Converter between {@link AppConfigValue}, which is the POJO of response from AWS AppConfig, and
@@ -29,18 +29,13 @@ public final class AppConfigValueConverter {
      * @param <T> target feature flag type (boolean / number / string)
      */
     public <T> EvaluationValue<T> toPrimitiveEvaluationValue(
-        @NotNull final T defaultValue,
-        @NotNull final AppConfigValue<T> appConfigValue
-    ) {
-        final ConversionResult<T> conversionResult = decideValue(
-            /* defaultValue = */ defaultValue,
-            /* appConfigValue = */ appConfigValue
-        );
+            @NotNull final T defaultValue, @NotNull final AppConfigValue<T> appConfigValue) {
+        final ConversionResult<T> conversionResult =
+                decideValue(/* defaultValue= */ defaultValue, /* appConfigValue= */ appConfigValue);
 
         return new PrimitiveEvaluationValue<>(
-            /* rawValue = */ conversionResult.getFeatureFlagValue(),
-            /* reason = */ conversionResult.getEvaluationResult().getReason()
-        );
+                /* rawValue= */ conversionResult.getFeatureFlagValue(),
+                /* reason= */ conversionResult.getEvaluationResult().getReason());
     }
 
     /**
@@ -52,32 +47,30 @@ public final class AppConfigValueConverter {
      */
     @NotNull
     public ObjectEvaluationValue toObjectEvaluationValue(
-        @NotNull final Value defaultValue,
-        @NotNull final AppConfigObjectValue appConfigObjectValue
-    ) {
-        final ConversionResult<Value> conversionResult = decideValue(
-            /* defaultValue = */ defaultValue,
-            /* appConfigValue = */ appConfigObjectValue
-        );
+            @NotNull final Value defaultValue,
+            @NotNull final AppConfigObjectValue appConfigObjectValue) {
+        final ConversionResult<Value> conversionResult =
+                decideValue(
+                        /* defaultValue= */ defaultValue,
+                        /* appConfigValue= */ appConfigObjectValue);
 
         return new ObjectEvaluationValue(
-            /* rawValue = */ conversionResult.getFeatureFlagValue(),
-            /* reason = */ conversionResult.getEvaluationResult().getReason()
-        );
+                /* rawValue= */ conversionResult.getFeatureFlagValue(),
+                /* reason= */ conversionResult.getEvaluationResult().getReason());
     }
 
     @VisibleForTesting
     @NotNull
     <T> ConversionResult<T> decideValue(
-        @NotNull final T defaultValue,
-        @NotNull final AppConfigValue<T> appConfigValue
-    ) {
+            @NotNull final T defaultValue, @NotNull final AppConfigValue<T> appConfigValue) {
         final boolean enabled = appConfigValue.getEnabled();
 
         final T featureFlagValue;
         final EvaluationResult evaluationResult;
         if (enabled) {
-            featureFlagValue = requireNonNull(appConfigValue.getValue(), "This is bug. Value must be non-null.");
+            featureFlagValue =
+                    requireNonNull(
+                            appConfigValue.getValue(), "This is bug. Value must be non-null.");
             evaluationResult = EvaluationResult.SUCCESS;
         } else {
             // if feature flag is disabled, fallback to default value
@@ -86,8 +79,8 @@ public final class AppConfigValueConverter {
         }
 
         return ConversionResult.<T>builder()
-            .featureFlagValue(featureFlagValue)
-            .evaluationResult(evaluationResult)
-            .build();
+                .featureFlagValue(featureFlagValue)
+                .evaluationResult(evaluationResult)
+                .build();
     }
 }

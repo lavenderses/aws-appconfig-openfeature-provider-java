@@ -1,5 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config;
 
+import java.time.Duration;
+import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -9,9 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClientBuilder;
-
-import java.time.Duration;
-import java.util.function.Consumer;
 
 /**
  * Configuration for accessing AWS AppConfig instance via AWS AppConfig data client from AWS SDK.
@@ -24,18 +23,13 @@ import java.util.function.Consumer;
 @ToString(callSuper = true)
 public final class AwsAppConfigDataClientProxyConfig implements AwsAppConfigProxyConfig {
 
-    @NotNull
-    @NonNull
-    private final Region region;
+    @NotNull @NonNull private final Region region;
 
-    @NotNull
-    @NonNull
-    private final Duration pollingDelay;
+    @NotNull @NonNull private final Duration pollingDelay;
 
     /**
      * An {@link AppConfigDataClientBuilder} configuration method. You can configure any options it supports.
      * If this is null, no more configuration will be applied to it. Just calls {@link AppConfigDataClient#create()}.
      */
-    @Nullable
-    private final Consumer<AppConfigDataClientBuilder> configure;
+    @Nullable private final Consumer<AppConfigDataClientBuilder> configure;
 }

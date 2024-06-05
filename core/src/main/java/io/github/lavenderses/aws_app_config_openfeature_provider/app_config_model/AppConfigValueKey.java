@@ -1,10 +1,10 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model;
 
-import lombok.Getter;
-import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
-import org.jetbrains.annotations.NotNull;
-
 import static java.util.Objects.requireNonNull;
+
+import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationValue;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * JSON key in the AWS AppConfig response.<br/>

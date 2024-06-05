@@ -10,7 +10,8 @@ import org.jetbrains.annotations.NotNull;
  * Parser implementation for int-type feature flag value.
  * This is for int type, but feature flag type will be a number in OpenFeature world.
  */
-public final class IntegerAttributeParser extends AbstractAttributeParser<Integer, AppConfigIntegerValue> {
+public final class IntegerAttributeParser
+        extends AbstractAttributeParser<Integer, AppConfigIntegerValue> {
 
     /**
      * Extract "Attribute" as Integer in JSON response from AWS AppConfig.
@@ -20,18 +21,14 @@ public final class IntegerAttributeParser extends AbstractAttributeParser<Intege
      * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
      */
     @Override
-    public AppConfigIntegerValue apply(
-        @NotNull JsonNode keyNode
-    ) {
-        final JsonNode flagValueNode = getValidFlagValueNode(
-            /* keyNode = */ keyNode,
-            /* expectedNodeType = */ JsonNodeType.NUMBER
-        );
+    public AppConfigIntegerValue apply(@NotNull JsonNode keyNode) {
+        final JsonNode flagValueNode =
+                getValidFlagValueNode(
+                        /* keyNode= */ keyNode, /* expectedNodeType= */ JsonNodeType.NUMBER);
 
         return new AppConfigIntegerValue(
-            /* enabled = */ enabled(keyNode),
-            /* value = */ flagValueNode.asInt(),
-            /* responseNode = */ keyNode.toString()
-        );
+                /* enabled= */ enabled(keyNode),
+                /* value= */ flagValueNode.asInt(),
+                /* responseNode= */ keyNode.toString());
     }
 }

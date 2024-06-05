@@ -15,9 +15,7 @@ import org.jetbrains.annotations.NotNull;
 @Builder(toBuilder = true)
 public final class Credential implements Comparable<Credential> {
 
-    @NotNull
-    @NonNull
-    private final String rawValue;
+    @NotNull @NonNull private final String rawValue;
 
     @Override
     public String toString() {

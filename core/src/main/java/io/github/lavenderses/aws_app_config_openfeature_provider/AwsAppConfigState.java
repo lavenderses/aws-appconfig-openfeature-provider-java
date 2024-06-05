@@ -9,8 +9,7 @@ public enum AwsAppConfigState {
     READY(ProviderState.READY),
     SHUTTING_DOWN(ProviderState.STALE),
     SHUT_DOWNED(ProviderState.STALE),
-    ERROR(ProviderState.ERROR)
-    ;
+    ERROR(ProviderState.ERROR);
 
     private final ProviderState providerState;
 

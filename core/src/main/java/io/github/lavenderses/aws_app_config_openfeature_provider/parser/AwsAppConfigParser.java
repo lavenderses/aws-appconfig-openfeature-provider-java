@@ -1,5 +1,7 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,13 +9,10 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_mode
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValueKey;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
+import java.util.function.Function;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
-
-import java.util.function.Function;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Parsing service between JSON response from AWS AppConfig and {@link AppConfigValue}, which is the POJO of the
@@ -54,10 +53,9 @@ public final class AwsAppConfigParser {
      */
     @NotNull
     public <T, V extends AppConfigValue<T>> V parse(
-        @NotNull final String key,
-        @Language("json") @NotNull final String value,
-        @NotNull final Function<JsonNode, V> buildAppConfigValue
-    ) {
+            @NotNull final String key,
+            @Language("json") @NotNull final String value,
+            @NotNull final Function<JsonNode, V> buildAppConfigValue) {
         requireNonNull(key, "key");
         requireNonNull(value, "value");
 
@@ -66,14 +64,11 @@ public final class AwsAppConfigParser {
             keyNode = objectMapper.readTree(value);
         } catch (JsonProcessingException e) {
             throw new AppConfigValueParseException(
-                /* response = */ value,
-                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
-            );
+                    /* response= */ value,
+                    /* evaluationResult= */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT);
         }
         requireNonNull(keyNode, "responseNode");
 
-        return buildAppConfigValue.apply(
-            /* v = */ keyNode
-        );
+        return buildAppConfigValue.apply(/* v= */ keyNode);
     }
 }

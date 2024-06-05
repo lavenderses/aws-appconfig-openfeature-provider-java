@@ -2,7 +2,6 @@ package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
-
 import java.util.function.Function;
 
 /**

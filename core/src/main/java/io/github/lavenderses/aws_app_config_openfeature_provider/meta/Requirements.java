@@ -1,9 +1,8 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.meta;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import org.jetbrains.annotations.NotNull;
 
 @Retention(RetentionPolicy.SOURCE)
 public @interface Requirements {

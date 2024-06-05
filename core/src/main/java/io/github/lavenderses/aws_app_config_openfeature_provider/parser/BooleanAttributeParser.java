@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Parser implementation for boolean-type feature flag value.
  */
-public final class BooleanAttributeParser extends AbstractAttributeParser<Boolean, AppConfigBooleanValue> {
+public final class BooleanAttributeParser
+        extends AbstractAttributeParser<Boolean, AppConfigBooleanValue> {
 
     /**
      * Extract "Attribute" as Boolean in JSON response from AWS AppConfig.
@@ -18,18 +19,14 @@ public final class BooleanAttributeParser extends AbstractAttributeParser<Boolea
      * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
      */
     @Override
-    public AppConfigBooleanValue apply(
-        @NotNull JsonNode keyNode
-    ) {
-        final JsonNode flagValueNode = getValidFlagValueNode(
-            /* keyNode = */ keyNode,
-            /* expectedNodeType = */ JsonNodeType.BOOLEAN
-        );
+    public AppConfigBooleanValue apply(@NotNull JsonNode keyNode) {
+        final JsonNode flagValueNode =
+                getValidFlagValueNode(
+                        /* keyNode= */ keyNode, /* expectedNodeType= */ JsonNodeType.BOOLEAN);
 
         return new AppConfigBooleanValue(
-            /* enabled = */ enabled(keyNode),
-            /* value = */ flagValueNode.asBoolean(),
-            /* responseNode = */ keyNode.toString()
-        );
+                /* enabled= */ enabled(keyNode),
+                /* value= */ flagValueNode.asBoolean(),
+                /* responseNode= */ keyNode.toString());
     }
 }

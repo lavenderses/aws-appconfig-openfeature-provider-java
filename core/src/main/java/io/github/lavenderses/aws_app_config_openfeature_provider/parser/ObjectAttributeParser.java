@@ -1,5 +1,8 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.parser;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,30 +13,25 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_mode
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigObjectValue;
 import io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.EvaluationResult;
 import io.github.lavenderses.aws_app_config_openfeature_provider.utils.ObjectMapperBuilder;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
-
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 /**
  * Parser implementation for Object-type (might be structure type in OpenFeature, or else primitive {@link Value} in
  * SDK) feature flag value.
  */
-public final class ObjectAttributeParser  extends AbstractAttributeParser<Value, AppConfigObjectValue> {
+public final class ObjectAttributeParser
+        extends AbstractAttributeParser<Value, AppConfigObjectValue> {
 
     private final ObjectMapper objectMapper;
 
     @VisibleForTesting
-    ObjectAttributeParser(
-        @NotNull final ObjectMapper objectMapper
-    ) {
+    ObjectAttributeParser(@NotNull final ObjectMapper objectMapper) {
         this.objectMapper = requireNonNull(objectMapper, "objectMapper");
     }
 
@@ -49,19 +47,14 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
      * @throws AppConfigValueParseException when {@param keyNode} is invalid schema
      */
     @Override
-    public AppConfigObjectValue apply(
-        @NotNull JsonNode keyNode
-    ) {
+    public AppConfigObjectValue apply(@NotNull JsonNode keyNode) {
         // AWS AppConfig returns JSON format string, so this JsonNode is String Type node.
-        final JsonNode flagRawValueNode = getValidFlagValueNode(
-            /* keyNode = */ keyNode,
-            /* expectedNodeType = */ null
-        );
+        final JsonNode flagRawValueNode =
+                getValidFlagValueNode(/* keyNode= */ keyNode, /* expectedNodeType= */ null);
         if (!flagRawValueNode.isTextual()) {
             throw new AppConfigValueParseException(
-                /* response = */ flagRawValueNode.toString(),
-                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
-            );
+                    /* response= */ flagRawValueNode.toString(),
+                    /* evaluationResult= */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT);
         }
         final String flagValueJsonString = flagRawValueNode.asText();
         final JsonNode flagValueNode;
@@ -69,24 +62,22 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
             flagValueNode = objectMapper.readTree(flagValueJsonString);
         } catch (final JsonProcessingException e) {
             throw new AppConfigValueParseException(
-                /* response = */ flagValueJsonString,
-                /* evaluationResult = */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT
-            );
+                    /* response= */ flagValueJsonString,
+                    /* evaluationResult= */ EvaluationResult.INVALID_ATTRIBUTE_FORMAT);
         }
 
         // add JSON node's value recursively
         final HashMap<String, Value> hashMap = new HashMap<>();
-        final Value value = convertJsonNodeAsValueRecursively(
-            /* valueNode = */ flagValueNode,
-            /* hashMap = */ hashMap,
-            /* add = */ hashMap::put
-        );
+        final Value value =
+                convertJsonNodeAsValueRecursively(
+                        /* valueNode= */ flagValueNode,
+                        /* hashMap= */ hashMap,
+                        /* add= */ hashMap::put);
 
         return new AppConfigObjectValue(
-            /* enabled = */ enabled(keyNode),
-            /* value = */ value,
-            /* responseNode = */ keyNode.toString()
-        );
+                /* enabled= */ enabled(keyNode),
+                /* value= */ value,
+                /* responseNode= */ keyNode.toString());
     }
 
     /**
@@ -100,14 +91,14 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
     @NotNull
     @VisibleForTesting
     Value convertJsonNodeAsValueRecursively(
-        @NotNull final JsonNode valueNode,
-        @NotNull final Map<String, Value> hashMap,
-        @NotNull final BiConsumer<String, Value> add
-    ) {
+            @NotNull final JsonNode valueNode,
+            @NotNull final Map<String, Value> hashMap,
+            @NotNull final BiConsumer<String, Value> add) {
         if (valueNode.isTextual()) {
             final String text = valueNode.asText();
 
-            // If feature flag is datetime, it will be as string type. So, try to parse it as Instant first.
+            // If feature flag is datetime, it will be as string type. So, try to parse it as
+            // Instant first.
             // When it is not the valid Instant schema, fallback it as string type
             try {
                 final Instant instant = Instant.parse(text);
@@ -122,23 +113,26 @@ public final class ObjectAttributeParser  extends AbstractAttributeParser<Value,
         }
 
         // Search each child node recursively
-        valueNode.fields().forEachRemaining(entry -> {
-            final String key = entry.getKey();
-            final JsonNode childNode = entry.getValue();
+        valueNode
+                .fields()
+                .forEachRemaining(
+                        entry -> {
+                            final String key = entry.getKey();
+                            final JsonNode childNode = entry.getValue();
 
-            if (isNull(childNode)) {
-                return;
-            }
-            final Map<String, Value> childHashMap = new HashMap<>();
+                            if (isNull(childNode)) {
+                                return;
+                            }
+                            final Map<String, Value> childHashMap = new HashMap<>();
 
-            final Value childValue = convertJsonNodeAsValueRecursively(
-                /* valueNode = */ childNode,
-                /* hashMap = */ childHashMap,
-                /* add = */ childHashMap::put
-            );
+                            final Value childValue =
+                                    convertJsonNodeAsValueRecursively(
+                                            /* valueNode= */ childNode,
+                                            /* hashMap= */ childHashMap,
+                                            /* add= */ childHashMap::put);
 
-            hashMap.put(key, childValue);
-        });
+                            hashMap.put(key, childValue);
+                        });
 
         final Structure structure = new ImmutableStructure(hashMap);
         return new Value(structure);

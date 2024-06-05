@@ -1,5 +1,8 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy.appconfig_data_client;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.lavenderses.aws_app_config_openfeature_provider.AwsAppConfigClientOptions;
 import io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue;
@@ -12,9 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import software.amazon.awssdk.services.appconfigdata.AppConfigDataClient;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
-
 /**
  * Provider implementation proxy for accessing AWS AppConfig instance via AWS AppConfig client from SDK.
  * <br/>
@@ -26,12 +26,11 @@ public final class AwsAppConfigDataClientProxy extends AbstractAwsAppConfigProxy
     private final CachedFeatureFlagManager cachedFeatureFlagManager;
 
     @VisibleForTesting
-    AwsAppConfigDataClientProxy(
-        @NotNull final CachedFeatureFlagManager cachedFeatureFlagManager
-    ) {
+    AwsAppConfigDataClientProxy(@NotNull final CachedFeatureFlagManager cachedFeatureFlagManager) {
         super();
 
-        this.cachedFeatureFlagManager = requireNonNull(cachedFeatureFlagManager, "cachedFeatureFlagManager");
+        this.cachedFeatureFlagManager =
+                requireNonNull(cachedFeatureFlagManager, "cachedFeatureFlagManager");
     }
 
     /**
@@ -43,16 +42,13 @@ public final class AwsAppConfigDataClientProxy extends AbstractAwsAppConfigProxy
      * @param config a configuration to {@link AppConfigDataClient}
      */
     public AwsAppConfigDataClientProxy(
-        @NotNull final AwsAppConfigClientOptions options,
-        @NotNull final AwsAppConfigDataClientProxyConfig config
-    ) {
+            @NotNull final AwsAppConfigClientOptions options,
+            @NotNull final AwsAppConfigDataClientProxyConfig config) {
         super();
 
-        cachedFeatureFlagManager = new CachedFeatureFlagManager(
-            /* options = */ options,
-            /* config = */ config,
-            /* startSession = */ true
-        );
+        cachedFeatureFlagManager =
+                new CachedFeatureFlagManager(
+                        /* options= */ options, /* config= */ config, /* startSession= */ true);
     }
 
     @PreDestroy
@@ -72,9 +68,9 @@ public final class AwsAppConfigDataClientProxy extends AbstractAwsAppConfigProxy
     @Nullable
     @Override
     public String getRawFlagObject(@NotNull final String key) {
-        final JsonNode featureFlagJsonValue = cachedFeatureFlagManager.getCachedFeatureFlagByKeyFrom(
-            /* key = */ requireNonNull(key, "key")
-        );
+        final JsonNode featureFlagJsonValue =
+                cachedFeatureFlagManager.getCachedFeatureFlagByKeyFrom(
+                        /* key= */ requireNonNull(key, "key"));
 
         if (isNull(featureFlagJsonValue)) {
             return null;

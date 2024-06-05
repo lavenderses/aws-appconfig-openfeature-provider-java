@@ -1,12 +1,11 @@
 package io.github.lavenderses.aws_app_config_openfeature_provider.proxy.config;
 
+import java.net.URI;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
-
-import java.net.URI;
 
 /**
  * Configuration for accessing AWS AppConfig instance via AWS AppConfig agent.
@@ -25,7 +24,5 @@ public final class AwsAppConfigAgentProxyConfig implements AwsAppConfigProxyConf
      * For example, if you are using it as Kubernetes pod's side-car container with default value, this would be
      * {@code https://localhost:2772}.
      */
-    @NotNull
-    @NonNull
-    private final URI endpoint;
+    @NotNull @NonNull private final URI endpoint;
 }
