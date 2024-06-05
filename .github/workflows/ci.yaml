@@ -22,7 +22,7 @@ jobs:
           distribution: "temurin"
 
       - name: lint
-        run: ./gradlew clean ktlintCheck detektMain detektTest detektTestFixtures --stacktrace
+        run: ./gradlew clean spotbugsMain spotlessCheck ktlintCheck detektMain detektTest detektTestFixtures --stacktrace
 
   test:
     runs-on: ubuntu-latest
