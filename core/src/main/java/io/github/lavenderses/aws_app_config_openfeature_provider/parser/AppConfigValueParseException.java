@@ -53,6 +53,7 @@ public class AppConfigValueParseException extends RuntimeException {
     }
 
     public <T> ErrorEvaluationValue<T> asErrorEvaluationResult() {
+        // TODO: NP
         return new ErrorEvaluationValue<>(
                 /* errorCode= */ evaluationResult.getErrorCode(),
                 /* errorMessage= */ errorMessage,

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 @ToString
 @Builder(toBuilder = true)
 @Data
-class ConversionResult<T> {
+final class ConversionResult<T> {
 
     @NotNull @NonNull private final T featureFlagValue;
 

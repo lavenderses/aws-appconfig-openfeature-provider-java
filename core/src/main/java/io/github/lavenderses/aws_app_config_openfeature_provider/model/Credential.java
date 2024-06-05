@@ -32,6 +32,11 @@ public final class Credential implements Comparable<Credential> {
     }
 
     @Override
+    public int hashCode() {
+        return rawValue.hashCode();
+    }
+
+    @Override
     public int compareTo(@NotNull Credential o) {
         return rawValue.compareTo(o.rawValue);
     }
