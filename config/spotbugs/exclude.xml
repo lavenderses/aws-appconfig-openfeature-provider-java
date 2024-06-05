@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/4.8.4"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/4.8.4 https://raw.githubusercontent.com/spotbugs/spotbugs/4.8.4/spotbugs/etc/findbugsfilter.xsd">
+    <Match>
+        <!-- redundant null check. this is caused by lombok. -->
+        <Bug code="RCN" />
+    </Match>
+
+    <Match>
+        <Or>
+            <!-- null pointer in provider. but this is interface, so no need to annotate param as @NotNull -->
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.AwsAppConfigFeatureProvider" />
+            <!-- FIXME -->
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.parser.AppConfigValueParseException" />
+        </Or>
+        <Bug code="NP" />
+    </Match>
+
+    <Match>
+        <Or>
+            <!-- flags is mutable. problem -->
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.proxy.appconfig_data_client.FeatureFlagCache$FeatureFlagCacheBuilder" />
+            <!-- exception is mutable. problem -->
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxyException" />
+        </Or>
+        <Bug code="EI2" />
+    </Match>
+
+    <!-- i think this is false positive -->
+    <Match>
+        <Or>
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.app_config_model.AppConfigValue" />
+            <Class name="io.github.lavenderses.aws_app_config_openfeature_provider.evaluation_value.ErrorEvaluationValue" />
+        </Or>
+        <Bug code="CT" />
+    </Match>
+</FindBugsFilter>

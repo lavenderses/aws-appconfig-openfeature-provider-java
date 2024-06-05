@@ -40,4 +40,5 @@ dependencies {
     implementation(libs.lombok.gradle.plugin)
     implementation(libs.spotbugs.gradle.plugin)
     implementation(libs.gradle.maven.publish.plugin)
+    implementation(libs.spotless.gradle.plugin)
 }
