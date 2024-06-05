@@ -20,6 +20,10 @@ public final class ScheduledTaskOption {
         .delay(Duration.ZERO)
         .build();
 
+    @NotNull
+    @NonNull
+    private final String taskName;
+
     /**
      * Fixed delay of the task({@link ScheduledTask}) interval.
      */

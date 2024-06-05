@@ -20,6 +20,7 @@ import io.github.lavenderses.aws_app_config_openfeature_provider.parser.ObjectAt
 import io.github.lavenderses.aws_app_config_openfeature_provider.parser.StringAttributeParser;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxy;
 import io.github.lavenderses.aws_app_config_openfeature_provider.proxy.AwsAppConfigProxyBuilder;
+import jakarta.annotation.PostConstruct;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +35,7 @@ import java.util.function.Function;
 /**
  * Service layer class for AWS AppConfig.
  */
-final class AwsAppConfigClientService {
+final class AwsAppConfigClientService implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(AwsAppConfigClientService.class);
 
@@ -112,6 +113,20 @@ final class AwsAppConfigClientService {
         integerAttributeParser = new IntegerAttributeParser();
         doubleAttributeParser = new DoubleAttributeParser();
         objectAttributeParser = new ObjectAttributeParser();
+    }
+
+    @Override
+    public void close() throws Exception {
+        appConfigState.set(AwsAppConfigState.SHUTTING_DOWN);
+
+        awsAppConfigProxy.close();
+
+        appConfigState.set(AwsAppConfigState.SHUT_DOWNED);
+    }
+
+    void initialize() {
+        appConfigState.set(AwsAppConfigState.PREPARING);
+        appConfigState.set(AwsAppConfigState.READY);
     }
 
     @NotNull

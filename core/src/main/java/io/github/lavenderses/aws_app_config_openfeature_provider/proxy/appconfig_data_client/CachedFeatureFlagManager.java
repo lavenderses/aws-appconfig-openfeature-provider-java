@@ -195,6 +195,7 @@ final class CachedFeatureFlagManager implements AutoCloseable {
         scheduledTaskExecutor = new ScheduledTaskExecutor(
             /* option = */ ScheduledTaskOption.builder()
                 .delay(config.getPollingDelay())
+                .taskName("cachedFeatureFlagUpdateTask")
                 .build()
         );
     }
