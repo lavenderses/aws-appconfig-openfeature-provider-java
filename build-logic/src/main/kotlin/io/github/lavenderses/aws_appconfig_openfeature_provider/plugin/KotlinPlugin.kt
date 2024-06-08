@@ -2,6 +2,8 @@ package io.github.lavenderses.aws_appconfig_openfeature_provider.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.getByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 class KotlinPlugin: Plugin<Project> {
 
@@ -11,6 +13,13 @@ class KotlinPlugin: Plugin<Project> {
                 // first party plugin
                 apply(BasePlugin::class.java)
                 apply(KotlinLintPlugin::class.java)
+                apply(libs.findPlugin("kotlin-jvm").get().get().pluginId)
+            }
+
+            with(extensions.getByType<KotlinJvmProjectExtension>()) {
+                compilerOptions {
+                    this.jvmTarget.set(PROJECT_JDK.jvmTarget)
+                }
             }
 
             with(dependencies) {
