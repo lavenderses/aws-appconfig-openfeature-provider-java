@@ -6,7 +6,6 @@ import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JavaTestFixturesPlugin
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 class BasePlugin : Plugin<Project> {
 
@@ -19,7 +18,6 @@ class BasePlugin : Plugin<Project> {
                 // third party
                 apply(JavaLibraryPlugin::class.java)
                 apply(JavaTestFixturesPlugin::class.java)
-                apply(libs.findPlugin("kotlin-jvm").get().get().pluginId)
             }
 
             group = projectGroupId
@@ -32,12 +30,6 @@ class BasePlugin : Plugin<Project> {
             with(extensions.getByType<JavaPluginExtension>()) {
                 sourceCompatibility = PROJECT_JDK.javaVersion
                 targetCompatibility = PROJECT_JDK.javaVersion
-            }
-
-            with(extensions.getByType<KotlinJvmProjectExtension>()) {
-                compilerOptions {
-                    this.jvmTarget.set(PROJECT_JDK.jvmTarget)
-                }
             }
 
             with(dependencies) {
