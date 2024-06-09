@@ -151,7 +151,7 @@ directory.
 }
 ```
 
-Disabled feature flag exampel with key name `key_1` and string feature flag value with value `you released`.
+Disabled feature flag example with key name `key_1` and string feature flag value with value `you released`.
 
 ```json
 {
@@ -200,17 +200,15 @@ curl http://localhost:2772/applications/{application name}/environments/{environ
 If you run with the above example, the HTTP request will be like following.
 
 ```shell
-curl http://localhost:2772/applications/app/environments/env/configurations/profile??flag=key_1
+curl http://localhost:2772/applications/app/environments/env/configurations/profile?flag=key_1
 ```
 
 You will get following JSON response. (This is exactly same as feature flag JSON file.)
 
 ```json
 {
-  "key_1": {
-    "enabled": false,
-    "flag_value": "you not released"
-  }
+  "enabled": false,
+  "flag_value": "you not released"
 }
 ```
 
@@ -233,13 +231,11 @@ If you want to experience dynamic flag value change, let's change the feature fl
 After a while, you'll get new feature flag value.
 
 ```shell
-curl http://localhost:2772/applications/app/environments/env/configurations/profile??flag=key_1
+curl http://localhost:2772/applications/app/environments/env/configurations/profile?flag=key_1
 
 {
-  "key_1": {
-    "enabled": true,
-    "flag_value": "you released"
-  }
+  "enabled": true,
+  "flag_value": "you released"
 }
 ```
 
