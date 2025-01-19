@@ -51,8 +51,7 @@ class PublicationPlugin: Plugin<Project> {
             }
 
             tasks.withType<GenerateModuleMetadata> {
-                // TODO: Remove kotlinSourcesJar
-                dependsOn("kotlinSourcesJar", "plainJavadocJar")
+                dependsOn("plainJavadocJar")
             }
         }
     }
