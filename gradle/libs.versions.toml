@@ -48,7 +48,7 @@ slf4j-log4j2 = { module = "org.slf4j:slf4j-log4j12"}
 armeria-bom = { module = "com.linecorp.armeria:armeria-bom", version.ref = "armeria" }
 armeria = { module = "com.linecorp.armeria:armeria" }
 armeria-kotlin = { module = "com.linecorp.armeria:armeria-kotlin" }
-jsonasesrt = { module = "org.skyscreamer:jsonassert", version = "1.5.1" }
+jsonasesrt = { module = "org.skyscreamer:jsonassert", version = "1.5.3" }
 
 # plugin
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
