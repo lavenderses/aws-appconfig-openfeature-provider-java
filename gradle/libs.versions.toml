@@ -56,7 +56,7 @@ lombok-gradle-plugin  = { module = "io.freefair.gradle:lombok-plugin", version =
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-gradle" }
 spotbugs-gradle-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version = "6.0.15" }
-gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.28.0" }
+gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.30.0" }
 
 # testing
 assertk = { module = "com.willowtreeapps.assertk:assertk", version = "0.28.1" }
