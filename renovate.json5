@@ -14,4 +14,10 @@
   ],
   // @lavenderses is in Tokyo
   "timezone": "Asia/Tokyo",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [ "minor", "patch" ],
+      "enabled": false,
+    }
+  ]
 }
