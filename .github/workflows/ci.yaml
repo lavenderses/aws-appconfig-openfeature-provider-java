@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew clean test -x integration-test:testing:test --stacktrace
 
       - name: test report
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v5
         if: always()
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
