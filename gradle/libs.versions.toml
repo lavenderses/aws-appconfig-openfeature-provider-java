@@ -9,7 +9,7 @@ kotlin-logging = "7.0.3"
 ktlint = "1.2.1"
 ktlint-gradle = "12.2.0"
 mockito = "4.11.0" # for Java 8
-mockito-kotlin = "4.1.0" # for Java 8
+mockito-kotlin = "5.4.0" # for Java 8
 openfeature = "1.8.0"
 
 [plugins]
